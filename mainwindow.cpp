@@ -7,8 +7,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    zoom_plot* zoom_plot_ = new zoom_plot(this);
-    this->setCentralWidget(zoom_plot_);
+    zoom_plot_window* zoom_plot = new zoom_plot_window(this);
+    this->setCentralWidget(zoom_plot);
 }
 
 MainWindow::~MainWindow()
