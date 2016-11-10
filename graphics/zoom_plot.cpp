@@ -1,4 +1,4 @@
-#include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QToolBar>
 #include <QAction>
 
@@ -64,13 +64,13 @@ void zoom_plot::set_plot_action(CURRENT_PLOT_ACTION action)
         switch(action)
         {
         case HZOOM_IN:
-            this->setCursor(QCursor(QBitmap(":/Icons/hzoom")));
+            this->setCursor(QCursor(QPixmap(":/Icons/hzoom")));
             break;
         case VZOOM_IN:
-            this->setCursor(QCursor(QBitmap(":/Icons/vzoom")));
+            this->setCursor(QCursor(QPixmap(":/Icons/vzoom")));
             break;
         case ZOOM_OUT:
-            this->setCursor(QCursor(QBitmap(":/Icons/zoom_out")));
+            this->setCursor(QCursor(QPixmap(":/Icons/zoom_out")));
             break;
         default:
             this->setCursor(QCursor(Qt::ArrowCursor));
@@ -81,13 +81,15 @@ void zoom_plot::set_plot_action(CURRENT_PLOT_ACTION action)
 zoom_plot_window::zoom_plot_window(QWidget *parent)
     :QWidget(parent)
 {
-    QVBoxLayout* layout = new QVBoxLayout;
+    QHBoxLayout* layout = new QHBoxLayout;
     this->setLayout(layout);
 
     QToolBar* toolbar = new QToolBar("Plot tools");
+    toolbar->setOrientation(Qt::Vertical);
     layout->addWidget(toolbar);
 
     zoom_plot* plot_area = new zoom_plot(this);
+    layout->setContentsMargins(0,0,0,0);
     layout->addWidget(plot_area);
 
     //Creates all toolbar actions
