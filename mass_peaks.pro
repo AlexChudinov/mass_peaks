@@ -29,7 +29,9 @@ DISTFILES += \
     graphics/icons/vzoom_icon.png \
     graphics/icons/zoom_out_icon.png \
     graphics/qcustomplot/changelog.txt \
-    graphics/qcustomplot/GPL.txt
+    graphics/qcustomplot/GPL.txt \
+    test_data_files/205.txt \
+    test_data_files/206.txt
 
 RESOURCES += \
     graphics/graphics.qrc

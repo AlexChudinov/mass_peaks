@@ -25,7 +25,7 @@ public:
     ~zoom_plot();
 
     void mousePressEvent(QMouseEvent* event);
-    //void mouseReleaseEvent(QMouseEvent* event);
+    void mouseReleaseEvent(QMouseEvent*);
     void mouseMoveEvent(QMouseEvent* event);
 
 signals:
@@ -50,6 +50,17 @@ private slots:
     void set_plot_action(CURRENT_PLOT_ACTION action);
 
 private:
+    /**
+     * Sets the selection area view on a screen
+     */
+    void set_hzoom_selection_area_(const QPoint& pos);
+    void set_vzoom_selection_area_(const QPoint& pos);
+
+    /**
+     * Zooming out
+     */
+    void zoom_out_();
+
     /**
      * Current plot action state
      */

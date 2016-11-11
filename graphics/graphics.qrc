@@ -3,5 +3,6 @@
         <file alias="hzoom">icons/hzoom_icon.png</file>
         <file alias="vzoom">icons/vzoom_icon.png</file>
         <file alias="zoom_out">icons/zoom_out_icon.png</file>
+        <file alias="rescale">icons/rescale_axis_icon.png</file>
     </qresource>
 </RCC>
