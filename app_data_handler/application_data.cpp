@@ -3,6 +3,17 @@
 #include <QFile>
 #include <QTextStream>
 
+const xy_data& application_data::add_new_xy_data(const std::string &name, const xy_data &d)
+{
+    xy_data_map_[name] = d;
+    return xy_data_map.at(name);
+}
+
+const xy_data& application_data::get_xy_data(const std::string &name) const
+{
+    return xy_data_map_.at(name);
+}
+
 application_data_handler::application_data_handler(QObject* parent)
     :
       QThread(parent),

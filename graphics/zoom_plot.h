@@ -31,7 +31,7 @@ public:
     void mouseReleaseEvent(QMouseEvent*);
     void mouseMoveEvent(QMouseEvent* event);
 
-signals:
+Q_SIGNALS:
     /**
      * Change toolbar buttons states
      */
@@ -39,7 +39,12 @@ signals:
     void hzoom_changed(bool);
     void zoom_out_changed(bool);
 
-private slots:
+    /**
+     * Graph was created
+     */
+    void graph_created(const QCPGraph*);
+
+private Q_SLOTS:
     /**
      * Changes zoom state to an oposite equals to a toggle in QAction
      */
@@ -51,6 +56,15 @@ private slots:
      * Sets current plot action mode
      */
     void set_plot_action(CURRENT_PLOT_ACTION action);
+
+    /**
+     * Puts xy_data on a new graph
+     */
+    QCPGraph* create_graph(const xy_data* d = nullptr);
+    /**
+     * Changes data on an existing graph
+     */
+    QCPGraph* change_graph_data(QCPGraph* g, const xy_data* d);
 
 private:
     /**
@@ -86,7 +100,7 @@ public:
      ~zoom_plot_window();
 
 signals:
-     void add_graph(const xy_data* xy);
+     void create_graph(const xy_data* xy);
 
 private:
 };

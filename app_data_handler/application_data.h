@@ -8,15 +8,31 @@
 #include <vector>
 #include <map>
 
-/**
- * This application is supposed to work with a mass spectrum
- */
-using mz_type            = double;
-using intensity_type     = double;
-using mass_spectrum      = std::pair<std::vector<mz_type>, std::vector<intensity_type>>;
-using mass_spectrums_map = std::map<std::string, mass_spectrum>;
+using x_type      = double;
+using y_type      = double;
+using xy_data     = std::pair<std::vector<x_type>, std::vector<y_type>>;
+using xy_data_map = std::map<std::string, xy_data>;
 
-class application_data;
+/**
+ * This is an interface to an xy-data
+ */
+class application_data
+{
+    xy_data_map xy_data_map_;
+
+public:
+    application_data(){}
+    virtual ~application_data(){}
+
+    /**
+     * Adds xy-data to a data map
+     */
+    const xy_data& add_new_xy_data(const std::string& name = QString(), const xy_data& d);
+    /**
+     * Gets an xy-data from a data map
+     */
+    const xy_data& get_xy_data(const std::string& name) const;
+};
 
 /**
  * Keeps application data and starts all data processes in a separate thread
@@ -26,24 +42,15 @@ class application_data_handler : public QThread
     Q_OBJECT
 
 public:
-    /**
-     * Processes that can be run in a separate thread
-     */
-    enum PROCESS_ID
-    {
-        LOAD_DATA     ///Load data from a file
-    };
-
     application_data_handler(QObject* parent = 0);
     virtual ~application_data_handler(){}
 
     void run();
 
     /**
-     * Sets the file name for data
+     * Sets the name for the current data under process
      */
-    void set_file_name(const QString& file_name)
-    { file_name_ = file_name; }
+    void set_active_data(const QString& file_name);
 
     /**
      * Choose which process to run in a separate thread
@@ -51,7 +58,7 @@ public:
      */
     void set_process(PROCESS_ID process_id);
 
-signals:
+Q_SIGNALS:
     /**
      * Progress flow indicator
      */
@@ -69,24 +76,18 @@ signals:
     void warning(QString msg);
 
     /**
-     * New mass spectrum was appended
+     * New xy data array was appended
      */
-    void mass_spectrum_appended(const mass_spectrum* ms);
-
-public slots:
-    /**
-     * Loads data from a file
-     */
-    void load_data_file(const QString& filename);
+    void xy_data_appended(const xy_data* ms);
 
 private:
-    QString file_name_;
+    QString name_;
     /**
      * Current reading/loading data process
      */
-    void (application_data_handler::*process_)(const QString&);
+    void(*process_)(xy_data*);
 
-    mass_spectrums_map mass_spectrums_;
+    application_data mass_spectrums_;
 };
 
 #endif // APP_DATA_H

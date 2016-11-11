@@ -111,6 +111,26 @@ void zoom_plot::set_plot_action(CURRENT_PLOT_ACTION action)
     }
 }
 
+QCPGraph* zoom_plot::create_graph(const xy_data *d)
+{
+    QCPGraph* g = this->addGraph();
+    if(d)
+    {
+        g->addData(QVector<double>::fromStdVector(d->first), QVector<double>::fromStdVector(d->second));
+    }
+    Q_EMIT this->graph_created(g);
+    this->update();
+    return g;
+}
+
+QCPGraph* zoom_plot::change_graph_data(QCPGraph *g, const xy_data *d)
+{
+    Q_ASSERT(d);
+    g->setData(QVector<double>::fromStdVector(d->first), QVector<double>::fromStdVector(d->second));
+    this->update();
+    return g;
+}
+
 void zoom_plot::set_hzoom_selection_area_(const QPoint &pos)
 {
     QPoint lower, upper;
