@@ -16,11 +16,13 @@ QMAKE_CXXFLAGS += -std=c++0x
 SOURCES += main.cpp\
         mainwindow.cpp \
     graphics/qcustomplot/qcustomplot.cpp \
-    graphics/zoom_plot.cpp
+    graphics/zoom_plot.cpp \
+    app_data_handler/application_data.cpp
 
 HEADERS  += mainwindow.h \
     graphics/qcustomplot/qcustomplot.h \
-    graphics/zoom_plot.h
+    graphics/zoom_plot.h \
+    app_data_handler/application_data.h
 
 FORMS    += mainwindow.ui
 

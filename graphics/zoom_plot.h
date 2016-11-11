@@ -2,10 +2,13 @@
 #define ZOOM_PLOT_H
 
 #include "qcustomplot/qcustomplot.h"
+#include <utility>
+#include <vector>
 
 /**
  * Plotting of (x, y ) data with a horizontal and a vertical zoom
  */
+using xy_data = std::pair<std::vector<double>, std::vector<double>>;
 
 class zoom_plot : public QCustomPlot
 {
@@ -81,6 +84,9 @@ class zoom_plot_window : public QWidget
 public:
      zoom_plot_window(QWidget* parent = 0);
      ~zoom_plot_window();
+
+signals:
+     void add_graph(const xy_data* xy);
 
 private:
 };
