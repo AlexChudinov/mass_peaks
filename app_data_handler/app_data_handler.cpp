@@ -3,6 +3,7 @@
 
 #include <QFile>
 #include <QTextStream>
+#include <QVector>
 
 app_data_handler::app_data_handler(QObject *parent)
     :
@@ -34,6 +35,11 @@ void app_data_handler::run()
 
 void app_data_handler::get_data()
 {
-    if(this->data_exporter_->data_ptr()) xy_data_ = this->data_exporter_->data_ptr();
-    Q_EMIT this->data_changed(xy_data_.data());
+    if(this->data_exporter_->data_ptr())
+    {
+        xy_data_ = this->data_exporter_->data_ptr();
+        Q_EMIT this->data_changed(
+                    vector_data_type::fromStdVector(xy_data_.data()->x()),
+                    vector_data_type::fromStdVector(xy_data_.data()->y()));
+    }
 }

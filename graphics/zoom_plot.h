@@ -40,11 +40,6 @@ Q_SIGNALS:
     void hzoom_changed(bool);
     void zoom_out_changed(bool);
 
-    /**
-     * Graph was created
-     */
-    void graph_created(const QCPGraph*);
-
 private Q_SLOTS:
     /**
      * Changes zoom state to an oposite equals to a toggle in QAction
@@ -96,6 +91,10 @@ class zoom_plot_window : public QWidget
 public:
      zoom_plot_window(QWidget* parent = 0);
      ~zoom_plot_window();
+
+     zoom_plot* plot_area() { return plot_area_; }
+private:
+     zoom_plot* plot_area_;
 };
 
 #endif // ZOOM_PLOT_H

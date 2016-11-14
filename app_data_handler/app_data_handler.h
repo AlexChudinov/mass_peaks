@@ -9,6 +9,8 @@
 
 class data_exporter;
 
+using vector_data_type = QVector<double>;
+
 /**
  * Keeps application data and starts all data processes in a separate thread
  */
@@ -21,6 +23,8 @@ public:
     virtual ~app_data_handler();
 
     void run();
+
+    const xy_data& data() const { return *this->xy_data_; }
 
 Q_SIGNALS:
     /**
@@ -42,7 +46,7 @@ Q_SIGNALS:
     /**
      * Emits new data
      */
-    void data_changed(const xy_data*);
+    void data_changed(const vector_data_type& x, const vector_data_type& y);
 
 public Q_SLOTS:
     /**

@@ -157,7 +157,7 @@ void zoom_plot::zoom_out_()
     new_upper = yrange.upper + (yrange.upper - yrange.center());
     this->yAxis->setRange(new_lower, new_upper);
 
-    this->update();
+    this->replot();
 }
 
 void zoom_plot::hzoom_in_()
@@ -166,7 +166,7 @@ void zoom_plot::hzoom_in_()
     double new_lower = this->xAxis->pixelToCoord(selection.left());
     double new_upper = this->xAxis->pixelToCoord(selection.right());
     this->xAxis->setRange(new_lower, new_upper);
-    this->update();
+    this->replot();
 }
 
 void zoom_plot::vzoom_in_()
@@ -175,11 +175,13 @@ void zoom_plot::vzoom_in_()
     double new_lower = this->yAxis->pixelToCoord(selection.bottom());
     double new_upper = this->yAxis->pixelToCoord(selection.top());
     this->yAxis->setRange(new_lower, new_upper);
-    this->update();
+    this->replot();
 }
 
 zoom_plot_window::zoom_plot_window(QWidget *parent)
-    :QWidget(parent)
+    :
+      QWidget(parent),
+      plot_area_(new zoom_plot(this))
 {
     QHBoxLayout* layout = new QHBoxLayout;
     this->setLayout(layout);
@@ -188,9 +190,8 @@ zoom_plot_window::zoom_plot_window(QWidget *parent)
     toolbar->setOrientation(Qt::Vertical);
     layout->addWidget(toolbar);
 
-    zoom_plot* plot_area = new zoom_plot(this);
     layout->setContentsMargins(0,0,0,0);
-    layout->addWidget(plot_area);
+    layout->addWidget(plot_area_);
 
     //Creates all toolbar actions
     QAction* hzoom_action    = new QAction(QIcon(":/Icons/hzoom"),"Horizontal zoom", this);
@@ -210,13 +211,13 @@ zoom_plot_window::zoom_plot_window(QWidget *parent)
     toolbar->addAction(rescale_action);
 
     //...and connect them
-    connect(hzoom_action, SIGNAL(toggled(bool)), plot_area, SLOT(set_hzoom(bool)));
-    connect(plot_area, SIGNAL(hzoom_changed(bool)), hzoom_action, SLOT(setChecked(bool)));
-    connect(vzoom_action, SIGNAL(toggled(bool)), plot_area, SLOT(set_vzoom(bool)));
-    connect(plot_area, SIGNAL(vzoom_changed(bool)), vzoom_action, SLOT(setChecked(bool)));
-    connect(zoom_out_action, SIGNAL(toggled(bool)), plot_area, SLOT(set_zoom_out(bool)));
-    connect(plot_area, SIGNAL(zoom_out_changed(bool)), zoom_out_action, SLOT(setChecked(bool)));
-    connect(rescale_action, SIGNAL(triggered()), plot_area, SLOT(rescaleAxes()));
+    connect(hzoom_action, SIGNAL(toggled(bool)), this->plot_area_, SLOT(set_hzoom(bool)));
+    connect(this->plot_area_, SIGNAL(hzoom_changed(bool)), hzoom_action, SLOT(setChecked(bool)));
+    connect(vzoom_action, SIGNAL(toggled(bool)), this->plot_area_, SLOT(set_vzoom(bool)));
+    connect(this->plot_area_, SIGNAL(vzoom_changed(bool)), vzoom_action, SLOT(setChecked(bool)));
+    connect(zoom_out_action, SIGNAL(toggled(bool)), this->plot_area_, SLOT(set_zoom_out(bool)));
+    connect(this->plot_area_, SIGNAL(zoom_out_changed(bool)), zoom_out_action, SLOT(setChecked(bool)));
+    connect(rescale_action, SIGNAL(triggered()), this->plot_area_, SLOT(rescaleAxes()));
 }
 
 zoom_plot_window::~zoom_plot_window(){}

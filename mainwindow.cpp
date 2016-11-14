@@ -8,23 +8,16 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    app_data_(new app_data_handler(this))
+    app_data_(new app_data_handler(this)),
+    app_data_view_(new zoom_plot_window(this))
 {
-    //Set widgets
+    //Set standard widgets
     ui->setupUi(this);
     ui->progressBar->hide();
     ui->statusBar->addWidget(ui->progressBar);
 
-    zoom_plot_window* zoom_plot = new zoom_plot_window(this);
-    this->setCentralWidget(zoom_plot);
-
-    connect(ui->open_file_action, SIGNAL(triggered()), this, SLOT(open_file_action()));
-    connect(this->app_data_, SIGNAL(started()), ui->progressBar, SLOT(show()));
-    connect(this->app_data_, SIGNAL(finished()), ui->progressBar, SLOT(hide()));
-    connect(this->app_data_, SIGNAL(progress_val(int)), ui->progressBar, SLOT(setValue(int)));
-    connect(this->app_data_, SIGNAL(busy(bool)), ui->open_file_action, SLOT(setDisabled(bool)));
-    connect(this->app_data_, SIGNAL(free(bool)), ui->open_file_action, SLOT(setEnabled(bool)));
-    connect(this->app_data_, SIGNAL(warning(QString)), this, SLOT(show_message(QString)));
+    this->connect_data_handler_();
+    this->create_data_view_();
 }
 
 MainWindow::~MainWindow()
@@ -47,4 +40,38 @@ void MainWindow::open_file_action()
 void MainWindow::show_message(QString msg)
 {
     QMessageBox::warning(this, "Mass specs programm message", msg);
+}
+
+void MainWindow::plot_data(const vector_data_type& x, const vector_data_type& y, bool keep_data_flag)
+{
+    if(!keep_data_flag) app_data_view_->plot_area()->clearGraphs();
+    app_data_view_->plot_area()->addGraph()->addData(x,y);
+    app_data_view_->plot_area()->rescaleAxes();
+    app_data_view_->plot_area()->replot();
+}
+
+void MainWindow::plot_data(bool keep_data_flag)
+{
+    vector_data_type
+            x = vector_data_type::fromStdVector(app_data_->data().x()),
+            y = vector_data_type::fromStdVector(app_data_->data().y());
+    this->plot_data(x,y,keep_data_flag);
+}
+
+void MainWindow::connect_data_handler_()
+{
+    connect(ui->open_file_action, SIGNAL(triggered()), this, SLOT(open_file_action()));
+    connect(this->app_data_, SIGNAL(started()), ui->progressBar, SLOT(show()));
+    connect(this->app_data_, SIGNAL(finished()), ui->progressBar, SLOT(hide()));
+    connect(this->app_data_, SIGNAL(progress_val(int)), ui->progressBar, SLOT(setValue(int)));
+    connect(this->app_data_, SIGNAL(busy(bool)), ui->open_file_action, SLOT(setDisabled(bool)));
+    connect(this->app_data_, SIGNAL(free(bool)), ui->open_file_action, SLOT(setEnabled(bool)));
+    connect(this->app_data_, SIGNAL(warning(QString)), this, SLOT(show_message(QString)));
+}
+
+void MainWindow::create_data_view_()
+{
+    this->setCentralWidget(this->app_data_view_);
+    connect(this->app_data_, SIGNAL(data_changed(vector_data_type,vector_data_type)),
+            this, SLOT(plot_data(vector_data_type,vector_data_type)));
 }
