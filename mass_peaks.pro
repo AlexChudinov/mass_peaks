@@ -17,12 +17,17 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     graphics/qcustomplot/qcustomplot.cpp \
     graphics/zoom_plot.cpp \
-    app_data_handler/application_data.cpp
+    app_data/data_export.cpp \
+    app_data_handler/app_data_handler.cpp \
+    app_data_handler/app_data_view.cpp
 
 HEADERS  += mainwindow.h \
     graphics/qcustomplot/qcustomplot.h \
     graphics/zoom_plot.h \
-    app_data_handler/application_data.h
+    app_data/app_data.h \
+    app_data/data_export.h \
+    app_data_handler/app_data_handler.h \
+    app_data_handler/app_data_view.h
 
 FORMS    += mainwindow.ui
 
@@ -36,4 +41,5 @@ DISTFILES += \
     test_data_files/206.txt
 
 RESOURCES += \
-    graphics/graphics.qrc
+    graphics/graphics.qrc \
+    resources.qrc

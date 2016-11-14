@@ -2,6 +2,7 @@
 #include <QToolBar>
 #include <QAction>
 
+#include "../app_data/app_data.h"
 #include "zoom_plot.h"
 #include "qcustomplot/qcustomplot.h"
 
@@ -9,7 +10,7 @@ zoom_plot::zoom_plot(QWidget *parent)
     :
       QCustomPlot(parent),
       plot_action_(NO_ACTION),
-      selection_area_(nullptr)
+      selection_area_(new QRubberBand(QRubberBand::Rectangle, this))
 {}
 
 zoom_plot::~zoom_plot(){}
@@ -24,7 +25,6 @@ void zoom_plot::mousePressEvent(QMouseEvent *event)
         {
         case HZOOM_IN:
         case VZOOM_IN:
-            this->selection_area_ = new QRubberBand(QRubberBand::Rectangle, this);
             break;
         case ZOOM_OUT:
             this->zoom_out_();
@@ -41,27 +41,35 @@ void zoom_plot::mousePressEvent(QMouseEvent *event)
 
 void zoom_plot::mouseReleaseEvent(QMouseEvent * /*event*/)
 {
-    if(this->selection_area_){ delete this->selection_area_; this->selection_area_ = nullptr;}
+    switch(this->plot_action_)
+    {
+    case HZOOM_IN:
+        hzoom_in_();
+        this->selection_area_->hide();
+        return;
+    case VZOOM_IN:
+        vzoom_in_();
+        this->selection_area_->hide();
+        return;
+    case ZOOM_OUT: return;
+    case NO_ACTION:return;
+    }
+
+    this->selection_area_->hide();
 }
 
 void zoom_plot::mouseMoveEvent(QMouseEvent *event)
 {
-    if(this->selection_area_)
+    switch(this->plot_action_)
     {
-        switch(this->plot_action_)
-        {
-        case HZOOM_IN:
-            set_hzoom_selection_area_(event->pos());
-            break;
-        case VZOOM_IN:
-            set_vzoom_selection_area_(event->pos());
-            break;
-        default:
-            QMessageBox::warning
-                    (0,
-                     "Message from a plotting window!",
-                     "Please, check the programm logic it should not be here!");
-        }
+    case HZOOM_IN:
+        if(event->buttons() == Qt::LeftButton) set_hzoom_selection_area_(event->pos());
+        break;
+    case VZOOM_IN:
+        if(event->buttons() == Qt::LeftButton) set_vzoom_selection_area_(event->pos());
+        break;
+    case ZOOM_OUT:  return;
+    case NO_ACTION: return;
     }
 }
 
@@ -89,9 +97,9 @@ void zoom_plot::set_plot_action(CURRENT_PLOT_ACTION action)
     {
         this->plot_action_ = action;
 
-        emit this->hzoom_changed(action == HZOOM_IN);
-        emit this->vzoom_changed(action == VZOOM_IN);
-        emit this->zoom_out_changed(action == ZOOM_OUT);
+        Q_EMIT this->hzoom_changed(action == HZOOM_IN);
+        Q_EMIT this->vzoom_changed(action == VZOOM_IN);
+        Q_EMIT this->zoom_out_changed(action == ZOOM_OUT);
 
         //Set action parameters
         switch(action)
@@ -109,26 +117,6 @@ void zoom_plot::set_plot_action(CURRENT_PLOT_ACTION action)
             this->setCursor(QCursor(Qt::ArrowCursor));
         }
     }
-}
-
-QCPGraph* zoom_plot::create_graph(const xy_data *d)
-{
-    QCPGraph* g = this->addGraph();
-    if(d)
-    {
-        g->addData(QVector<double>::fromStdVector(d->first), QVector<double>::fromStdVector(d->second));
-    }
-    Q_EMIT this->graph_created(g);
-    this->update();
-    return g;
-}
-
-QCPGraph* zoom_plot::change_graph_data(QCPGraph *g, const xy_data *d)
-{
-    Q_ASSERT(d);
-    g->setData(QVector<double>::fromStdVector(d->first), QVector<double>::fromStdVector(d->second));
-    this->update();
-    return g;
 }
 
 void zoom_plot::set_hzoom_selection_area_(const QPoint &pos)
@@ -169,6 +157,24 @@ void zoom_plot::zoom_out_()
     new_upper = yrange.upper + (yrange.upper - yrange.center());
     this->yAxis->setRange(new_lower, new_upper);
 
+    this->update();
+}
+
+void zoom_plot::hzoom_in_()
+{
+    QRect selection = this->selection_area_->geometry();
+    double new_lower = this->xAxis->pixelToCoord(selection.left());
+    double new_upper = this->xAxis->pixelToCoord(selection.right());
+    this->xAxis->setRange(new_lower, new_upper);
+    this->update();
+}
+
+void zoom_plot::vzoom_in_()
+{
+    QRect selection = this->selection_area_->geometry();
+    double new_lower = this->yAxis->pixelToCoord(selection.bottom());
+    double new_upper = this->yAxis->pixelToCoord(selection.top());
+    this->yAxis->setRange(new_lower, new_upper);
     this->update();
 }
 

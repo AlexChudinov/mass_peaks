@@ -5,10 +5,11 @@
 #include <utility>
 #include <vector>
 
+class xy_data;
+
 /**
  * Plotting of (x, y ) data with a horizontal and a vertical zoom
  */
-using xy_data = std::pair<std::vector<double>, std::vector<double>>;
 
 class zoom_plot : public QCustomPlot
 {
@@ -57,15 +58,6 @@ private Q_SLOTS:
      */
     void set_plot_action(CURRENT_PLOT_ACTION action);
 
-    /**
-     * Puts xy_data on a new graph
-     */
-    QCPGraph* create_graph(const xy_data* d = nullptr);
-    /**
-     * Changes data on an existing graph
-     */
-    QCPGraph* change_graph_data(QCPGraph* g, const xy_data* d);
-
 private:
     /**
      * Sets the selection area view on a screen
@@ -79,6 +71,12 @@ private:
     void zoom_out_();
 
     /**
+     * Apply zooming into plot
+     */
+    void hzoom_in_();
+    void vzoom_in_();
+
+    /**
      * Current plot action state
      */
     CURRENT_PLOT_ACTION plot_action_;
@@ -86,7 +84,7 @@ private:
      * Position of a first mouse press
      */
     QPoint mouse_press_position_;
-    QRubberBand* selection_area_;
+    QScopedPointer<QRubberBand> selection_area_;
 };
 
 /**
@@ -98,11 +96,6 @@ class zoom_plot_window : public QWidget
 public:
      zoom_plot_window(QWidget* parent = 0);
      ~zoom_plot_window();
-
-signals:
-     void create_graph(const xy_data* xy);
-
-private:
 };
 
 #endif // ZOOM_PLOT_H

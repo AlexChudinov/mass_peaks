@@ -13,7 +13,21 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QWidget" name="centralWidget"/>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QProgressBar" name="progressBar">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>590</y>
+      <width>118</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>24</number>
+    </property>
+   </widget>
+  </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
@@ -31,8 +45,22 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="open_file_action"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="open_file_action">
+   <property name="icon">
+    <iconset>
+     <normalon>:/Icons/file_open_icon</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Open data file</string>
+   </property>
+   <property name="toolTip">
+    <string>Loads ascii delimited data from a file</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
