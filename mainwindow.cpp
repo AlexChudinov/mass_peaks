@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "graphics/zoom_plot.h"
 #include "app_data_handler/app_data_handler.h"
+#include "app_data/math/sym_diag_matrix.h"
 
 #include <QFileDialog>
 
@@ -15,6 +16,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->progressBar->hide();
     ui->statusBar->addWidget(ui->progressBar);
+
+    //Test:
+    sym_diag_mat<1,6> m;
+    m(0,0) = 1.0;
+    m(1,0) = 2.0;
+    //*****
 
     this->connect_data_handler_();
     this->create_data_view_();
