@@ -6,7 +6,7 @@
 namespace math
 {
     /**
-     * Solves a system of equations with a symmetric diagonal matrix
+     * Solves a system of equations with a symmetric diagonal matrix, no error checking supported
      */
     template <class DataType>
     int tridiagonalsolve
@@ -19,8 +19,7 @@ namespace math
             DataType* x   //solution
         )
     //solve Ax=b where A is a tridiagonal matrix, returns 0 if it is ok
-    //It changes inserted data array b and r. It was taken from
-    //https://vk.com/pages?oid=-30481242&p=%D0%9C%D0%B5%D1%82%D0%BE%D0%B4_%D0%BF%D1%80%D0%BE%D0%B3%D0%BE%D0%BD%D0%BA%D0%B8
+    //It changes inserted data array b and r.
     {
         for (int i = 0; i < n-1; i++)
         {
@@ -34,7 +33,7 @@ namespace math
         return 0;
     }
     /**
-     * Solves five diagonal linear equation system
+     * Solves five diagonal linear equation system with a symmetric matrix, no error checking supported
      */
     template<class DataType> int fivediagonalsolve
         (
