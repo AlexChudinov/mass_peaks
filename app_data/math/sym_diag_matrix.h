@@ -4,67 +4,63 @@
 #include <vector>
 #include <cstdlib>
 #include <algorithm>
-#include <array>
+
+
+#include "matrixtemplate.h"
+
+namespace math {
 
 /**
  * Symmetric diagonal matrices
  */
-template<size_t D, size_t N>
+template<size_t D>
 class sym_diag_mat
 {
 public:
-    using data_vector = std::vector<double>;
+    using row_vals = math::vector_c<double, 2*D + 1>;
+    using data_vector = std::vector< math::vector_c<double, row_vals> >;
 
 private:
     data_vector data_;
 
 public:
-    sym_diag_mat()
+    /**
+     * Preallocates data storage
+     */
+    sym_diag_mat(size_t size)
         :
-          data_(N * (2*D + 1)) {}
+          data_(size) {}
 
     /**
      * Uniform diagonal values
      */
-    sym_diag_mat(const std::array<double, D + 1>& vals)
+    sym_diag_mat(const math::vector_c<double, D + 1>& vals, size_t size)
         :
-          data_(N * (2*D + 1))
+          data_(size)
     {
-        for(size_t i = 0; i < N; ++i)
-            for(size_t j = (i - D > 0 ? i - D : 0);
-                j < (i + D <= N ? i + D : N); ++j)
+        sym_diag_mat& M = *this;
 
+        for(size_t i = 0; i < size; ++i) M.data_[i][D] = vals[0];
+
+        for(size_t i = 1; i <= D; ++i)
+            for(size_t j = 0; j < size-D; ++j)
+                M.data_[j][2*D + 1 - i] = M.data_[j + i][i - 1] = vals[i];
     }
 
-    /**
-     * Returns pointer to a first element of a diagonal
-     */
-    double * diag(int n) { return &data_[N * (D + n)]; }
-    const double * diag(int n) const { return &data_[N * (D + n)]; }
+    size_t size() const { return data_.size(); }
 
-    /**
-     * Returns matrix element
-     */
-    const double& operator()(size_t i, size_t j) const
-    {
-        int ndiag = j - i;
-        return ndiag < 0 ? diag(ndiag)[i] : diag(ndiag)[i - ndiag];
-    }
-    double& operator () (size_t i, size_t j)
-    {
-        int ndiag = j - i;
-        return ndiag < 0 ? diag(ndiag)[i] : diag(ndiag)[i - ndiag];
-    }
+
 };
 
-/**
- * Matrix matrix multiplication
- */
-template<size_t D1, size_t D2, size_t N>
-sym_diag_mat<D1 + D2 - 1, N> mult(const sym_diag_mat<D1, N>& m1, const sym_diag_mat<D2, N>& m2)
+template<class D1, class D2>
+sym_diag_mat< D1 + D2 > matrix_multiplication(const sym_diag_mat<D1>& md1, const sym_diag_mat<D2>& md2)
 {
-    size_t ndiags = D1 + D2 - 1;
-    for(size_t i = 0; i < N; ++i);
+    using vectorD1xD2 = math::vector_c<double, 2 * (D1 + D2) + 1>;
+    assert(md1.size() == md2.size());
+    size_t N = md1.size();
+    sym_diag_mat< D1 + D2 > m(N);
+
 }
 
+} //end of namespace math
 #endif // SYM_DIAG_MATRIX_H

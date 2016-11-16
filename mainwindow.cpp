@@ -18,9 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->addWidget(ui->progressBar);
 
     //Test:
-    sym_diag_mat<1,6> m;
-    m(0,0) = 1.0;
-    m(1,0) = 2.0;
+    math::sym_diag_mat<1> m(math::vector_c<double, 2>{1.,2.},10);
     //*****
 
     this->connect_data_handler_();
