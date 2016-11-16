@@ -217,6 +217,43 @@ inline T prod(const vector_c<T, N>& v)
     return res;
 }
 
+/**
+ * Put one vector into another at position pos
+ * ----[bbbbbb]+++++
+ * pos[ssss]
+ */
+template<class T, size_t N1, size_t N2>
+inline vector_c<T, N1> put(const vector_c<T, N2>& v2, int pos)
+{
+    static_assert(N1 >= N2, "You can put only smaller into bigger");
+    vector_c<T, N1> v1;
+    size_t start1, start2, end;
+    if(pos >= 0)
+    {
+        //[bbbbbb]+++++++
+        //         [sssss]
+        if(size_t(pos) >= v1.size()) return v1;
+        else
+        {
+            start1 = pos;
+            start2 = 0;
+            end = std::min(pos + v2.size(), v1.size());
+        }
+    }
+    else
+    {
+        if(pos + int(v2.size()) <= 0) return v1;
+        else
+        {
+            start1 = 0;
+            start2 = std::abs(pos);
+            end = v2.size() - start2;
+        }
+    }
+    while(start1 < end) v1[start1++] = v2[start2++];
+    return v1;
 }
+
+} //End of math namespace
 
 #endif // VECTORTEMPLATE_H

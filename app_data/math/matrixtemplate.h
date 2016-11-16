@@ -438,7 +438,6 @@ matrix_c<T, m, n> operator * (const T& h, const matrix_c<T, m, n>& M)
 template<class T, size_t m, size_t n>
 matrix_c<T, n, m> transpose(const matrix_c<T, m, n>& M)
 {
-    using matrix = matrix_c<T, m, n>;
     using matrix_result = matrix_c<T, n, m>;
     using row_vector = const_proxy_matrix_row<T, m, n>;
     using col_vector = proxy_matrix_col<T, n, m>;
@@ -447,9 +446,9 @@ matrix_c<T, n, m> transpose(const matrix_c<T, m, n>& M)
 
     auto set_elements = [&result, M](size_t res_row_idx)
     {
-        col_vector col(res_, res_row_idx);
+        col_vector col(result, res_row_idx);
         math::array_operations<col_vector, row_vector, n-1>
-                ::bmap(math::set_val<T>, col, M.row(res_row_idx));
+                ::bmap(math::set_val<T>(), col, M.row(res_row_idx));
     };
 
     math::For<0, m, true> ::Do( set_elements );
