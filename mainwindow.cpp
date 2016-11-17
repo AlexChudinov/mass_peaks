@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 #include "graphics/zoom_plot.h"
 #include "app_data_handler/app_data_handler.h"
-#include "app_data/math/sym_diag_matrix.h"
+#include "app_data/math/spline.h"
 
 #include <QFileDialog>
 
@@ -18,8 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->addWidget(ui->progressBar);
 
     //Test:
-    math::vector_c<double, 3> v1 =
-            math::put<double, 3, 2>({1.,2.},2);
+    cubic_spline spline({1,3,4,2,5,7},{2,3,4,5,6,7});
     //*****
 
     this->connect_data_handler_();

@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     graphics/qcustomplot/qcustomplot.cpp \
     graphics/zoom_plot.cpp \
     app_data/data_export.cpp \
-    app_data_handler/app_data_handler.cpp
+    app_data_handler/app_data_handler.cpp \
+    app_data/math/spline.cpp
 
 HEADERS  += mainwindow.h \
     graphics/qcustomplot/qcustomplot.h \
