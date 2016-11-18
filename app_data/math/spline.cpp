@@ -53,14 +53,14 @@ String spline_base::check_xy_vals(data_vector &x, data_vector &y)
 void cubic_spline::calculate_spline_(const data_vector& y, const data_vector &w)
 {
     size_t N = x_.size();
-    data_vector h(N - 1); //differences
+    data_vector h(N-1); //differences
     //Set differences
     for(size_t i = 0; i < h.size(); ++i) h[i] = x_[i+1] - x_[i];
 
     data_vector a(N), g(N), b(N-1), c(N-2);
 
     //boundaries:
-    a[0] = a[N-1] = 1.0 / 6.0;
+    a[0] = a[N-1] = 1./6.;
     b[0] = c[0] = c[N-3] = b[N-2] = g[0] = g[N-1] = 0.0;
     //********************
 
@@ -82,15 +82,13 @@ void cubic_spline::calculate_spline_(const data_vector& y, const data_vector &w)
     a_[0]  = y[0]  - (c_[1] - c_[0]) / h[0] * w[0];
     a_[N-1]= y[N-1]+ (c_[N-1] - c[N-2]) / h[N-2] * w[N-1];
     d_[0] = (c_[1] - c_[0]) / h[0];
-    d_[N-1]=(c_[0] - c_[N-1])/h[0];
-    b_[0] = (y[1] - y[0]) / h[0] - c_[0] / 2. * h[0] - d_[0] / 6. * h[0];
-    b_[N-1]= (y[0] - y[N-1]) / h[0] - c_[N-1] / 2. * h[0] - d_[N-1] / 6. * h[0];
     for(size_t i = 1; i < N-1; ++i)
     {
         a_[i] = y[i] - w[i] * ((c_[i+1] - c_[i]) / h[i] - (c_[i] - c_[i-1]) / h[i-1]);
         d_[i] = (c_[i+1] - c_[i]) / h[i];
-        b_[i] = (y[i+1] - y[i]) / h[i] - c_[i] / 2. * h[i] - d_[i] / 6. * h[i];
+        b_[i-1] = (a_[i] - a_[i-1]) / h[i-1] - c_[i-1] / 2. * h[i-1] - d_[i-1] / 6. * h[i-1] * h[i-1];
     }
+    b_[N-2] = (a_[N-1] - a_[N-2]) / h[N-2] - c_[N-2] / 2. * h[N-2] - d_[N-2] / 6. * h[N-2] * h[N-2];
 }
 
 cubic_spline::cubic_spline(
@@ -117,7 +115,7 @@ size_t cubic_spline::idx_of_interval(double x) const
 {
     size_t
             start = 0,
-            end = x_.size() - 1;
+            end = x_.size() - 2;
 
     if(x < x_[start]) return start;
     if(x >= x_[end]) return end;

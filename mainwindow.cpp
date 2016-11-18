@@ -18,20 +18,21 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->addWidget(ui->progressBar);
 
     //Test:
-    cubic_spline spline({1,2,3,4,5,6},{2,3,4,15,6,7}, 10);
+    cubic_spline spline({1,1.3,2.1,2.5,3,3.5},{2,3,4,15,6,7}, 0.001);
     std::vector<double> x(100);
     size_t idx = 0;
-    for(double& x_val : x) x_val = 0.8 + 0.1 * (idx++);
+    for(double& x_val : x) x_val = 0.8 + 0.05 * (idx++);
     std::vector<double> y = spline.estimate_y_vals(x);
     //*****
 
     this->connect_data_handler_();
     this->create_data_view_();
 
-    app_data_view_->plot_area()->addGraph()->addData({1,2,3,4,5,6},{2,3,4,15,6,7});
+    app_data_view_->plot_area()->addGraph()->addData({1,1.3,2.1,2.5,3,3.5},{2,3,4,15,6,7});
     QCPGraph* g = app_data_view_->plot_area()->addGraph();
     g->addData(QVector<double>::fromStdVector(x), QVector<double>::fromStdVector(y));
     g->setPen(QPen(Qt::red));
+    app_data_view_->plot_area()->xAxis->setTickLabelFont(QFont("Times",20));
 }
 
 MainWindow::~MainWindow()
