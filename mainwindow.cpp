@@ -18,11 +18,20 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->addWidget(ui->progressBar);
 
     //Test:
-    cubic_spline spline({1,3,4,2,5,7},{2,3,4,5,6,7});
+    cubic_spline spline({1,2,3,4,5,6},{2,3,4,15,6,7}, 10);
+    std::vector<double> x(100);
+    size_t idx = 0;
+    for(double& x_val : x) x_val = 0.8 + 0.1 * (idx++);
+    std::vector<double> y = spline.estimate_y_vals(x);
     //*****
 
     this->connect_data_handler_();
     this->create_data_view_();
+
+    app_data_view_->plot_area()->addGraph()->addData({1,2,3,4,5,6},{2,3,4,15,6,7});
+    QCPGraph* g = app_data_view_->plot_area()->addGraph();
+    g->addData(QVector<double>::fromStdVector(x), QVector<double>::fromStdVector(y));
+    g->setPen(QPen(Qt::red));
 }
 
 MainWindow::~MainWindow()

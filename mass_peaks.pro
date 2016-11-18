@@ -28,12 +28,7 @@ HEADERS  += mainwindow.h \
     app_data/data_export.h \
     app_data_handler/app_data_handler.h \
     app_data/math/solvers.h \
-    app_data/math/spline.h \
-    app_data/math/sym_diag_matrix.h \
-    app_data/math/array_operations.h \
-    app_data/math/mathutility.h \
-    app_data/math/matrixtemplate.h \
-    app_data/math/vectortemplate.h
+    app_data/math/spline.h
 
 FORMS    += mainwindow.ui
 

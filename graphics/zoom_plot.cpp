@@ -218,6 +218,7 @@ zoom_plot_window::zoom_plot_window(QWidget *parent)
     connect(zoom_out_action, SIGNAL(toggled(bool)), this->plot_area_, SLOT(set_zoom_out(bool)));
     connect(this->plot_area_, SIGNAL(zoom_out_changed(bool)), zoom_out_action, SLOT(setChecked(bool)));
     connect(rescale_action, SIGNAL(triggered()), this->plot_area_, SLOT(rescaleAxes()));
+    connect(rescale_action, SIGNAL(triggered()), this->plot_area_, SLOT(replot()));
 }
 
 zoom_plot_window::~zoom_plot_window(){}
