@@ -58,6 +58,11 @@ public Q_SLOTS:
      * Get data from exporter
      */
     void get_data();
+
+    /**
+     * Create approximator
+     */
+    void set_approximator(APPROXIMATOR type, double smoothing);
 private:
     QSharedPointer<xy_data> xy_data_;
     QSharedPointer<data_exporter> data_exporter_;

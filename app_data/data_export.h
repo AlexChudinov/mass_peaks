@@ -10,7 +10,7 @@
 enum DATA_EXPORT_TYPE
 {
     ASCII_FILE = 0x00,
-    UNKNOWN = 0xFF
+    DATA_EXPORT_UNKNOWN = 0xFF
 };
 
 class data_exporter : public QObject, public QRunnable

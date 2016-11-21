@@ -111,41 +111,36 @@ class cubic_spline
     void calculate_spline_(const xy_values_type& xy_vals, const data_vector_type& w)
     {
         size_t N = xy_vals.size();
-        std::unique_ptr<Float[]>
-                a(new Float[N]),
-                b(new Float[N]),
-                c(new Float[N]),
-                d(new Float[N]),
-                x(new Float[N]),
-                y(new Float[N]);
-
+        data_vector_type x(N), y(N);
         auto it = xy_vals.cbegin();
         for(size_t i = 0; it != xy_vals.cend(); ++it, ++i)
         {
             x[i] = it->first;
             y[i] = it->second;
         }
+        calculate_spline_(x,y,w);
+    }
 
-        math::cubic_spline_coefficients(
-                    N,
-                    a.get(),
-                    b.get(),
-                    c.get(),
-                    d.get(),
-                    x.get(),
-                    y.get(),
-                    w.data());
-
-        poly_.reset(new peacewise_poly(xy_vals.size()));
+    /**
+     * Calculates spline using two vectors instead of map
+     */
+    void calculate_spline_(const data_vector_type& x, const data_vector_type& y, const data_vector_type& w)
+    {
+        size_t N = std::min(x.size(), y.size());
+        std::unique_ptr<Float[]>
+                a(new Float[N]),
+                b(new Float[N]),
+                c(new Float[N]),
+                d(new Float[N]);
+        math::cubic_spline_coefficients(N,a.get(),b.get(),c.get(),d.get(),x.data(),y.data(),w.data());
+        poly_.reset(new peacewise_poly(N));
         auto& refPoly = *poly_;
-
         for(size_t i = 0; i < N; ++i)
         {
-            std::array<Float, 4>& coefs = refPoly[x[i]];
-            coefs[0] = d[i]/6.;
-            coefs[1] = c[i]/2.;
-            coefs[2] = b[i];
-            coefs[3] = a[i];
+            refPoly[x[i]][0] = d[i]/6.;
+            refPoly[x[i]][1] = c[i]/2.;
+            refPoly[x[i]][2] = b[i];
+            refPoly[x[i]][3] = a[i];
         }
     }
 
@@ -158,12 +153,20 @@ public:
             const data_vector_type& w = data_vector_type())
     {
         data_vector_type w_(xy_vals.size(), smooth_param);
-        if(!w.empty())
-        {
-            for(size_t i = 0; i < std::min(w_.size(), w.size()); ++i)
-                w_[i] *= w[i];
-        }
+        for(size_t i = 0; i < std::min(w_.size(), w.size()); ++i)
+            w_[i] *= w[i];
         calculate_spline_(xy_vals, w_);
+    }
+
+    cubic_spline(const data_vector_type& x,
+                 const data_vector_type& y,
+                 double smooth_param = 0.0,
+                 const data_vector_type& w = data_vector_type())
+    {
+        data_vector_type w_(std::min(x.size(), y.size()), smooth_param);
+        for(size_t i = 0; i < std::min(w_.size(), w.size()); ++i)
+            w_[i] *= w[i];
+        calculate_spline_(x,y,w_);
     }
 
     virtual ~cubic_spline(){}

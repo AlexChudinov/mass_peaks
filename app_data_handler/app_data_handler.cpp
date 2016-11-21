@@ -43,3 +43,10 @@ void app_data_handler::get_data()
                     vector_data_type::fromStdVector(xy_data_.data()->y()));
     }
 }
+
+void app_data_handler::set_approximator(APPROXIMATOR type, double smoothing)
+{
+    cubic_spline_params params;
+    params.smoothing_ = smoothing;
+    xy_data_->set_approximator(type, &params);
+}

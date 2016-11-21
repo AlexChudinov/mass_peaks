@@ -36,7 +36,7 @@ namespace math
     /**
      * Solves five diagonal linear equation system with a symmetric matrix, no error checking supported
      */
-    template<class DataType> int fivediagonalsolve
+    template<class DataType> void fivediagonalsolve
         (
             int n,          //number of equations
             const DataType* a,
@@ -67,8 +67,6 @@ namespace math
 
         for(int i = n-3; i >= 0; i--)
             x[i] = (r[i] - d[i]*x[i+1] - e[i]*x[i+2]) / c[i];
-
-        return 0;
     }
 
     ///Solves equation fun(x) = 0 (abs(fun(x))<eps) on interval [a,b]
