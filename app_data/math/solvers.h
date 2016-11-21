@@ -1,6 +1,7 @@
 #ifndef SOLVERS_H
 #define SOLVERS_H
 
+#include <memory>
 #include <algorithm>
 
 namespace math
@@ -17,7 +18,7 @@ namespace math
             DataType* c,  //upper diagonal
             DataType* r,  //right-hand part
             DataType* x   //solution
-        )
+        ) noexcept
     //solve Ax=b where A is a tridiagonal matrix, returns 0 if it is ok
     //It changes inserted data array b and r.
     {
@@ -37,17 +38,17 @@ namespace math
      */
     template<class DataType> int fivediagonalsolve
         (
-            int n,          //number of equations
-            DataType* a,
+            size_t n,          //number of equations
+            const DataType* a,
             DataType* b,
             DataType* c,    //main diagonal
             DataType* d,
             DataType* e,
             DataType* r,    //right-hand part
             DataType* x     //solution
-        )
+        ) noexcept
     {
-        for(int i = 0; i < n-2; i++)
+        for(size_t i = 0; i < n-2; i++)
         {
             DataType m1 = b[i]/c[i];
             DataType m2 = a[i]/c[i];
@@ -97,6 +98,97 @@ namespace math
             if (fc < 0) b = c;
             if (fc > 0) a = c;
         }
+    }
+
+    /**
+     * Calculates coefficients of a smoothing cubic spline
+     * S(x) = a + b*x + c*x^2/2 + d*x^3/6
+     * Note: no exceptions is not guaranteed
+     */
+    template<typename Float>
+    void cubic_spline_coefficients
+    (
+            size_t N, //number of points
+            Float* a,
+            Float* b,
+            Float* c,
+            Float* d,
+            const Float* const x,
+            const Float* const y,
+            const Float* const w
+    )
+    {
+        Float h1, h2, h3;
+
+        //Set boundaries:
+        a[0] = a[N-1] = 1./6.;
+        b[0] = b[N-2] = c[0] = c[N-3] = d[0] = d[N-1] = 0.0;
+        //********************
+
+        //Set matrix values
+        for(size_t i = 1; i < N-3; ++i)
+        {
+            h1 = x[i] - x[i-1];
+            h2 = x[i+1] - x[i];
+            h3 = x[i+2] - x[i+1];
+
+            a[i] = 1./3. * (h1 + h2) + 1./h1/h1 * w[i-1]
+                    + (1./h1 + 1./h2)*(1./h1 + 1./h2) * w[i]
+                    + 1./h2/h2 * w[i+1];
+
+            d[i] = (y[i+1] - y[i]) / h2 - (y[i] - y[i-1]) / h1;
+
+            b[i] = 1./6. * h2 - 1./h2 * ((1./h1 + 1./h2)*w[i]
+                                         + (1./h2 + 1./h3)*w[i+1]);
+
+            c[i] = 1./h2/h3 * w[i+1];
+        }
+        h1 = x[N-3] - x[N-4];
+        h2 = x[N-2] - x[N-3];
+        h3 = x[N-1] - x[N-2];
+        b[N-3] = 1./6. * h2 - 1./h2 * ((1./h1 + 1./h2)*w[N-3]
+                                       + (1./h2 + 1./h3)*w[N-2]);
+        a[N-3] = 1./3. * (h1 + h2) + 1./h1/h1 * w[N-4]
+                + (1./h1 + 1./h2)*(1./h1 + 1./h2) * w[N-3]
+                + 1./h2/h2 * w[N-2];
+        d[N-3] = (y[N-2] - y[N-3]) / h2 - (y[N-3] - y[N-4]) / h1;
+        a[N-2] = 1./3. * (h2 + h3) + 1./h2/h2 * w[N-3]
+                + (1./h2 + 1./h3)*(1./h2 + 1./h3) * w[N-2]
+                + 1./h3/h3 * w[N-1];
+        d[N-2] = (y[N-1] - y[N-2]) / h3 - (y[N-2] - y[N-3]) / h2;
+
+        //duplicate values for a symmetric matrix
+        std::unique_ptr<Float[]>
+                cl(new Float[N-2]),
+                bl(new Float[N-1]),
+                c_(new Float[N]); //Preallocate to temporary keep solution
+        std::copy(c, c+N-2, cl.get());
+        std::copy(b, b+N-1, bl.get());
+        /***************/
+
+        //Calculates second order spline derivatives into c_
+        math::fivediagonalsolve(N, cl.get(), bl.get(), a, b, c, d, c_.get());
+
+        h1 = x[1] - x[0]; h2 = x[N-1] - x[N-2];
+        a[0]  = y[0]  - (c_[1] - c_[0]) / h1 * w[0];
+        a[N-1]= y[N-1]+ (c_[N-1] - c[N-2]) / h2 * w[N-1];
+        d[0] = (c_[1] - c_[0]) / h1;
+        for(size_t i = 1; i < N-1; ++i)
+        {
+            h1 = x[i] - x[i-1];
+            h2 = x[i+1] - x[i];
+            a[i] = y[i] - w[i] * ((c_[i+1] - c_[i]) / h2
+                    - (c_[i] - c_[i-1]) / h1);
+            d[i] = (c_[i+1] - c_[i]) / h2;
+            b[i-1] = (a[i] - a[i-1]) / h1
+                    - (c_[i-1] / 2. - d[i-1] / 6. * h1) * h1;
+        }
+
+        h1 = x[N-1] - x[N-2];
+        b[N-2] = (a[N-1] - a[N-2]) / h1
+                - (c[N-2] / 2. - d[N-2] / 6. * h1) * h1;
+        b[N-1] = b[N-2] + (c_[N-2] + d[N-2] * h1 / 2) * h1;
+        std::copy(c_.get(), c_.get() + N, c);
     }
 }
 
