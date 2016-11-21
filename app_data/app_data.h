@@ -2,6 +2,7 @@
 #define APP_DATA_H
 
 #include <vector>
+#include "../
 
 using data_vector_type = std::vector<double>;
 
@@ -39,6 +40,12 @@ public:
     virtual data_vector_type approximate(double xmin, double xmax, int nsteps) = 0;
 };
 
+/**
+ * Regular cubic spline data approximation
+ */
+class spline_approximation : public approximation
+{
 
+};
 
 #endif // APP_DATA_H

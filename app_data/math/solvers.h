@@ -38,7 +38,7 @@ namespace math
      */
     template<class DataType> int fivediagonalsolve
         (
-            size_t n,          //number of equations
+            int n,          //number of equations
             const DataType* a,
             DataType* b,
             DataType* c,    //main diagonal
@@ -48,7 +48,7 @@ namespace math
             DataType* x     //solution
         ) noexcept
     {
-        for(size_t i = 0; i < n-2; i++)
+        for(int i = 0; i < n-2; i++)
         {
             DataType m1 = b[i]/c[i];
             DataType m2 = a[i]/c[i];
@@ -181,13 +181,12 @@ namespace math
                     - (c_[i] - c_[i-1]) / h1);
             d[i] = (c_[i+1] - c_[i]) / h2;
             b[i-1] = (a[i] - a[i-1]) / h1
-                    - (c_[i-1] / 2. - d[i-1] / 6. * h1) * h1;
+                    - (c_[i-1] / 2. + d[i-1] / 6. * h1) * h1;
         }
-
         h1 = x[N-1] - x[N-2];
         b[N-2] = (a[N-1] - a[N-2]) / h1
-                - (c[N-2] / 2. - d[N-2] / 6. * h1) * h1;
-        b[N-1] = b[N-2] + (c_[N-2] + d[N-2] * h1 / 2) * h1;
+                - (c_[N-2] / 2. + d[N-2] / 6. * h1) * h1;
+        b[N-1] = b[N-2] + (c_[N-2] + d[N-2] * h1 / 2.) * h1;
         std::copy(c_.get(), c_.get() + N, c);
     }
 }

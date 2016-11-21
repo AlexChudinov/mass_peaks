@@ -20,19 +20,19 @@ MainWindow::MainWindow(QWidget *parent) :
     //Test:
     using xy_data = std::map<double, double>;
     xy_data xy;
-    xy[1] = 2; xy[2] = 3; xy[3] = 4;
-    xy[4] = 15; xy[5] = 6; xy[6] = 7;
-    cubic_spline<double> spline(xy, 0.00);
-    std::vector<double> x(10);
+    xy[1.1] = 2; xy[2.4] = 3; xy[3] = 4;
+    xy[4] = 15; xy[5.3] = 6; xy[6] = 7;
+    cubic_spline<double> spline(xy, 0.1);
+    std::vector<double> x(100);
     size_t idx = 0;
-    for(double& x_val : x) x_val = 1.0 + 1.0 * (idx++);
+    for(double& x_val : x) x_val = 1.0 + 0.05 * (idx++);
     std::vector<double> y = spline.poly().estimate_y_vals(x);
     //*****
 
     this->connect_data_handler_();
     this->create_data_view_();
 
-    app_data_view_->plot_area()->addGraph()->addData({1,2,3,4,5,6},{2,3,4,15,6,7});
+    app_data_view_->plot_area()->addGraph()->addData({1.1,2.4,3,4,5.3,6},{2,3,4,15,6,7});
     QCPGraph* g = app_data_view_->plot_area()->addGraph();
     g->addData(QVector<double>::fromStdVector(x), QVector<double>::fromStdVector(y));
     g->setPen(QPen(Qt::red));
