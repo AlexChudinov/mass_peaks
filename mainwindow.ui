@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>MS data analysis</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QProgressBar" name="progressBar">
@@ -46,6 +46,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="open_file_action"/>
+   <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="open_file_action">

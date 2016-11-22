@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 
+class QCPRange;
 class app_data_handler;
 class zoom_plot_window;
 using vector_data_type = QVector<double>;
@@ -23,6 +24,16 @@ public:
     Q_SLOT void show_message(QString msg);
     Q_SLOT void plot_data(const vector_data_type &x, const vector_data_type &y, bool keep_data_flag = false);
     Q_SLOT void plot_data(bool keep_data_flag = false);
+
+    //Approximator management
+    Q_SLOT void changeSmoothing(double smoothing);
+    Q_SLOT void changeApproximator(QString name);
+
+    /**
+     * Shows approximatin curve
+     */
+    Q_SLOT void showApproxLine(QCPRange& range);
+
 private:
     Ui::MainWindow *ui;
     app_data_handler* app_data_;
@@ -30,6 +41,18 @@ private:
 
     void connect_data_handler_();
     void create_data_view_();
+    Q_SLOT void init_approximator_handles_();
+    void calculate_std_();
+    Q_SIGNAL stdChanged_(QString msg);
+    /**
+     * Structs that holds all the approximator parameters
+     */
+    struct ApproximatorParams
+    {
+        double smoothing_;
+        QString name_;
+        int nsteps;
+    } approximatorParams_;
 };
 
 #endif // MAINWINDOW_H

@@ -52,7 +52,7 @@ public:
 class data_export_factory
 {
 public:
-    static QSharedPointer<data_exporter> create_data_exporter(DATA_EXPORT_TYPE type, QVariant params);
+    static data_exporter* create_data_exporter(DATA_EXPORT_TYPE type, QVariant params);
 };
 
 

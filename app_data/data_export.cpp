@@ -44,10 +44,12 @@ void load_data_from_ascii_file::run()
 
         QStringList xy_values = line.split("\t");
 
-        DEF_READ_ASSERT(xy_values.size() == 2, QString("More than two numbers on line %1.").arg(line_number));
+        DEF_READ_ASSERT((xy_values.size() == 2 && data_ptr_->w().empty()) || xy_values.size() == 3,
+                        QString("Number of columns at line %1 is %2.").arg(line_number).arg(xy_values.size()));
 
         data_ptr_->x().push_back(xy_values[0].toDouble());
         data_ptr_->y().push_back(xy_values[1].toDouble());
+        if(xy_values.size() == 3) data_ptr_->w().push_back(xy_values[2].toDouble());
     }
 
     Q_EMIT this->progress_val(100);
@@ -55,10 +57,10 @@ void load_data_from_ascii_file::run()
 #undef DEF_READ_ASSERT
 }
 
-QSharedPointer<data_exporter> data_export_factory::create_data_exporter(DATA_EXPORT_TYPE type, QVariant params)
+data_exporter* data_export_factory::create_data_exporter(DATA_EXPORT_TYPE type, QVariant params)
 {
     switch (type) {
-    case ASCII_FILE: return QSharedPointer<data_exporter>(new load_data_from_ascii_file(params));
-    default: return QSharedPointer<data_exporter>();
+    case ASCII_FILE: return new load_data_from_ascii_file(params);
+    default: return nullptr;
     }
 }

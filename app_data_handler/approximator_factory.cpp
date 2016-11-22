@@ -1,4 +1,4 @@
-#include "../app_data/app_data.h"
+#include "../app_data_handler/approximator_factory.h"
 
 approximator* approximator_factory::create_approximator(APPROXIMATOR type,
                                                         const approximator_params *params,
@@ -14,11 +14,6 @@ approximator* approximator_factory::create_approximator(APPROXIMATOR type,
     default:
         return nullptr;
     }
-}
-
-void xy_data::set_approximator(APPROXIMATOR type, const approximator_params *params)
-{
-    approximator_.reset(approximator_factory::create_approximator(type, params, x_, y_));
 }
 
 cubic_spline_approximator::cubic_spline_approximator(const data_vector_type &x,
