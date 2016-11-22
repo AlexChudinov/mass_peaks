@@ -32,7 +32,7 @@ public:
     /**
      * Shows approximatin curve
      */
-    Q_SLOT void showApproxLine(QCPRange& range);
+    Q_SLOT void showApproxLine();
 
 private:
     Ui::MainWindow *ui;
@@ -42,6 +42,7 @@ private:
     void connect_data_handler_();
     void create_data_view_();
     Q_SLOT void init_approximator_handles_();
+
     void calculate_std_();
     Q_SIGNAL stdChanged_(QString msg);
     /**

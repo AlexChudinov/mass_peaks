@@ -158,6 +158,8 @@ void zoom_plot::zoom_out_()
     this->yAxis->setRange(new_lower, new_upper);
 
     this->replot();
+    Q_EMIT this->xrangeNotify();
+    Q_EMIT this->yrangeNotify();
 }
 
 void zoom_plot::hzoom_in_()
@@ -167,6 +169,7 @@ void zoom_plot::hzoom_in_()
     double new_upper = this->xAxis->pixelToCoord(selection.right());
     this->xAxis->setRange(new_lower, new_upper);
     this->replot();
+    Q_EMIT this->xrangeNotify();
 }
 
 void zoom_plot::vzoom_in_()
@@ -176,6 +179,7 @@ void zoom_plot::vzoom_in_()
     double new_upper = this->yAxis->pixelToCoord(selection.top());
     this->yAxis->setRange(new_lower, new_upper);
     this->replot();
+    Q_EMIT this->yrangeNotify();
 }
 
 zoom_plot_window::zoom_plot_window(QWidget *parent)
@@ -219,6 +223,8 @@ zoom_plot_window::zoom_plot_window(QWidget *parent)
     connect(this->plot_area_, SIGNAL(zoom_out_changed(bool)), zoom_out_action, SLOT(setChecked(bool)));
     connect(rescale_action, SIGNAL(triggered()), this->plot_area_, SLOT(rescaleAxes()));
     connect(rescale_action, SIGNAL(triggered()), this->plot_area_, SLOT(replot()));
+    connect(rescale_action, SIGNAL(triggered()), this->plot_area_, SIGNAL(xrangeNotify()));
+    connect(rescale_action, SIGNAL(triggered()), this->plot_area_, SIGNAL(yrangeNotify()));
 }
 
 zoom_plot_window::~zoom_plot_window(){}

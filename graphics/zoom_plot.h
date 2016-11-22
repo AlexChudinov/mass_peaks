@@ -40,6 +40,12 @@ Q_SIGNALS:
     void hzoom_changed(bool);
     void zoom_out_changed(bool);
 
+    /**
+     * Range was changed
+     */
+    void xrangeNotify();
+    void yrangeNotify();
+
 private Q_SLOTS:
     /**
      * Changes zoom state to an oposite equals to a toggle in QAction

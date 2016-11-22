@@ -30,6 +30,11 @@ public:
      */
     QVector<double> get_approximated_vals(const QVector<double>& x);
 
+    /**
+     * Checks if approximator was created
+     */
+    bool hasApproximator() const { return bool(xy_data_approximator_); }
+
 Q_SIGNALS:
     /**
      * Progress flow indicator
@@ -56,6 +61,11 @@ Q_SIGNALS:
      * Notifies that data is ready
      */
     void dataChanged();
+
+    /**
+     * Approximator is ready
+     */
+    void approximatorChanged();
 
 public Q_SLOTS:
     /**

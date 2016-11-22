@@ -63,7 +63,7 @@ void app_data_handler::set_approximator(QString name, void *params)
         xy_data_approximator_.reset(approximator_factory::create_approximator
                                     (CUBIC_SPLINE, app_pars,
                                      xy_data_->x(), xy_data_->y()));
-        Q_EMIT this->dataChanged();
+        Q_EMIT this->approximatorChanged();
     }
 }
 
@@ -77,6 +77,6 @@ void app_data_handler::set_approximator(QString name, double smoothing)
         xy_data_approximator_.reset(approximator_factory::create_approximator
                                     (CUBIC_SPLINE, &app_pars,
                                      xy_data_->x(), xy_data_->y()));
-        Q_EMIT this->dataChanged();
+        Q_EMIT this->approximatorChanged();
     }
 }

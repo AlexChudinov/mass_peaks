@@ -28,6 +28,7 @@ public:
      * Preallocates poly coefficients in memory
      */
     peacewise_poly(size_t N = 0){ poly_coefs_.get_allocator().allocate(N); }
+    virtual ~peacewise_poly(){}
 
     /**
      * Returns the order of polynomial
@@ -45,7 +46,7 @@ public:
     Float estimate_y_val(const Float& xval) const
     {
         auto xyval = poly_coefs_.lower_bound(xval);
-        xyval = xyval == poly_coefs_.begin() ? xyval : --xyval;
+        if(xyval != poly_coefs_.begin()) --xyval;
         const poly_coef_type& coefs = xyval->second;
         Float dx = xval - xyval->first;
         Float res = coefs[0];
@@ -88,9 +89,50 @@ public:
             });
         }
 
+        return res;
     }
 
-    virtual ~peacewise_poly(){}
+    /**
+     * Get right hand side polynomial zero
+     */
+    Float rhzero(const Float& x0) const
+    {
+        Float y0 = this->estimate_y_val(x0);
+        auto itxy = poly_coefs_.lower_bound(x0);
+        if(itxy == poly_coefs_.end())
+            return x0;
+        Float y1 = itxy->second[n];
+        while(y0 * y1 >= 0.0)
+        {
+            y0 = y1;
+            if(++itxy == poly_coefs_.end()) return x0;
+            y1 = itxy->second[n];
+        }
+        Float x1 = itxy->first; x0 = (--itxy)->first;
+        auto fun = [this](Float x)->Float
+        {
+            return this->estimate_y_val(x);
+        };
+
+        return math::fZero(fun, x0, x1, fabs(y1 - y0)*1e-10);
+    }
+
+    /**
+     * Get all polynomial zeros between begin()->first and end()->first
+     */
+    std::vector<Float> get_zeros() const
+    {
+        std::vector<Float> zs;
+        Float x0 = poly_coefs_.begin()->first;
+        Float x1 = this->rhzero(x0);
+        while(x1 != x0)
+        {
+            zs.push_back(x1);
+            x0 = x1;
+            x1 = this->rhzero(x0);
+        }
+        return zs;
+    }
 };
 
 /**
@@ -101,6 +143,7 @@ class cubic_spline
 {
     using xy_values_type = std::map<Float, Float>;
     using data_vector_type = std::vector<Float>;
+    using diff_poly = peacewise_poly<2, Float>;
     using peacewise_poly = peacewise_poly<3, Float>;
 
     std::unique_ptr<peacewise_poly> poly_;
@@ -175,9 +218,6 @@ public:
      * Returns ref to a peacewise polynomial
      */
     const peacewise_poly& poly() const { return *poly_; }
-
-private:
-
 };
 
 #endif // SPLINE_H

@@ -88,18 +88,21 @@ void MainWindow::changeApproximator(QString name)
     this->calculate_std_();
 }
 
-void MainWindow::showApproxLine(QCPRange &range)
+void MainWindow::showApproxLine()
 {
+    QCPRange range = app_data_view_->plot_area()->xAxis->range();
     double xmin = range.lower, xmax = range.upper, dx = (xmax-xmin) / approximatorParams_.nsteps;
-    QVector<double> x, y;
-    while(xmin < xmax)
-    {
-        x.push_back(xmin);
-        x += dx;
-    }
+    QVector<double> x(approximatorParams_.nsteps), y;
+    std::for_each(x.begin(), x.end(), [&xmin, dx](double& xval){ xval = (xmin+=dx);});
     y = app_data_->get_approximated_vals(x);
-
-    app_data_view_->plot_area()->addGraph()
+    QCPGraph* g;
+    if(app_data_view_->plot_area()->graphCount() == 2)
+        g = app_data_view_->plot_area()->graph();
+    else
+        g = app_data_view_->plot_area()->addGraph();
+    g->setData(x,y,true);
+    g->setPen(QPen(Qt::red));
+    app_data_view_->plot_area()->replot();
 }
 
 void MainWindow::connect_data_handler_()
@@ -122,14 +125,10 @@ void MainWindow::create_data_view_()
 
 void MainWindow::init_approximator_handles_()
 {
-    static bool only_once;
+    disconnect(app_data_, SIGNAL(finished()), this, SLOT(init_approximator_handles_()));
 
-    disconnect(app_data_, SIGNAL(finished()),
-               this, SLOT(init_approximator_handles_()));
-    if(!only_once)
+    if(!app_data_->hasApproximator())
     {
-        only_once = true;
-
         //Create approximator chooser
         QComboBox* set_approxmtr_ = new QComboBox(this);
         set_approxmtr_->addItem({"Cubic spline"});
@@ -150,6 +149,9 @@ void MainWindow::init_approximator_handles_()
         ui->mainToolBar->addWidget(show_std_);
         connect(this, SIGNAL(stdChanged_(QString)), show_std_, SLOT(setText(QString)));
 
+        connect(app_data_, SIGNAL(approximatorChanged()), this, SLOT(showApproxLine()));
+        connect(app_data_view_->plot_area(), SIGNAL(xrangeNotify()),
+                this, SLOT(showApproxLine()));
         app_data_->set_approximator(approximatorParams_.name_,approximatorParams_.smoothing_);
     }
 }

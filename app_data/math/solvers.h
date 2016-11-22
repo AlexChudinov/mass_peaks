@@ -76,7 +76,7 @@ namespace math
     /// \param b Right interval bounadry
     /// \param eps Small value
     template<class FunObject, class DataType>
-    DataType fZero(FunObject fun, DataType a, DataType b, DataType eps)
+    DataType fZero(FunObject fun, DataType a, DataType b, DataType eps = 1e-16)
     {
         auto abs = [](DataType x)->DataType
         {
@@ -169,7 +169,7 @@ namespace math
 
         h1 = x[1] - x[0]; h2 = x[N-1] - x[N-2];
         a[0]  = y[0]  - (c_[1] - c_[0]) / h1 * w[0];
-        a[N-1]= y[N-1]+ (c_[N-1] - c[N-2]) / h2 * w[N-1];
+        a[N-1]= y[N-1]+ (c_[N-1] - c_[N-2]) / h2 * w[N-1];
         d[0] = (c_[1] - c_[0]) / h1;
         for(size_t i = 1; i < N-1; ++i)
         {
