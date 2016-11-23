@@ -34,6 +34,11 @@ public:
      */
     Q_SLOT void showApproxLine();
 
+    /**
+     * Shows peaks parameters
+     */
+    Q_SLOT void calculatePeaks();
+
 private:
     Ui::MainWindow *ui;
     app_data_handler* app_data_;

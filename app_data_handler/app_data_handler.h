@@ -31,6 +31,11 @@ public:
     QVector<double> get_approximated_vals(const QVector<double>& x);
 
     /**
+     * Finds peak positions in a spectrum
+     */
+    QVector<double> getPeakPositions() const;
+
+    /**
      * Checks if approximator was created
      */
     bool hasApproximator() const { return bool(xy_data_approximator_); }

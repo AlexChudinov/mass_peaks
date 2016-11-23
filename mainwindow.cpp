@@ -4,6 +4,7 @@
 #include "app_data/app_data.h"
 #include "app_data_handler/app_data_handler.h"
 #include "app_data_handler/approximator_factory.h"
+#include "xy_data_view.h"
 
 #include <QFileDialog>
 #include <QComboBox>
@@ -22,6 +23,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->progressBar->hide();
     ui->statusBar->addWidget(ui->progressBar);
+    ui->xyTableContents->setLayout(ui->xyTableLayout);
+    ui->xyTableLayout->addWidget(ui->tableView);
 
     this->connect_data_handler_();
     this->create_data_view_();
@@ -29,6 +32,10 @@ MainWindow::MainWindow(QWidget *parent) :
     //Set plot fonts
     app_data_view_->plot_area()->xAxis->setTickLabelFont(QFont("Times", 14));
     app_data_view_->plot_area()->yAxis->setTickLabelFont(QFont("Times", 14));
+
+    QAction* peaks_table_toggle_action = ui->xyTable->toggleViewAction();
+    peaks_table_toggle_action->setIcon(QIcon(":/Icons/table_icon"));
+    ui->mainToolBar->addAction(peaks_table_toggle_action);
 }
 
 MainWindow::~MainWindow()
@@ -105,6 +112,19 @@ void MainWindow::showApproxLine()
     app_data_view_->plot_area()->replot();
 }
 
+void MainWindow::calculatePeaks()
+{
+    QVector<double> peak_positions   = this->app_data_->getPeakPositions();
+    QVector<double> peak_intensities = this->app_data_->get_approximated_vals(peak_positions);
+
+    XyDataTableView* peaksTable = new MassPeaksTable(this);
+
+    peaksTable->setXyData(peak_positions, peak_intensities);
+
+    this->ui->tableView->setModel(peaksTable);
+    this->ui->tableView->update();
+}
+
 void MainWindow::connect_data_handler_()
 {
     connect(ui->open_file_action, SIGNAL(triggered()), this, SLOT(open_file_action()));
@@ -121,6 +141,7 @@ void MainWindow::create_data_view_()
     this->setCentralWidget(this->app_data_view_);
     connect(this->app_data_, SIGNAL(data_changed(vector_data_type,vector_data_type)),
             this, SLOT(plot_data(vector_data_type,vector_data_type)));
+    connect(this->app_data_, SIGNAL(approximatorChanged()), this, SLOT(calculatePeaks()));
 }
 
 void MainWindow::init_approximator_handles_()
@@ -152,8 +173,9 @@ void MainWindow::init_approximator_handles_()
         connect(app_data_, SIGNAL(approximatorChanged()), this, SLOT(showApproxLine()));
         connect(app_data_view_->plot_area(), SIGNAL(xrangeNotify()),
                 this, SLOT(showApproxLine()));
-        app_data_->set_approximator(approximatorParams_.name_,approximatorParams_.smoothing_);
     }
+
+    app_data_->set_approximator(approximatorParams_.name_,approximatorParams_.smoothing_);
 }
 
 void MainWindow::calculate_std_()

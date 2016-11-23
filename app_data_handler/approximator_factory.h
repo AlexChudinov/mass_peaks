@@ -52,6 +52,11 @@ public:
      */
     virtual data_vector_type approximate(const data_vector_type& x) = 0;
 
+    /**
+     * Calculates all peak positions in a spectrum
+     */
+    virtual data_vector_type getPeaks() = 0;
+
     virtual ~approximator(){}
 };
 
@@ -70,6 +75,8 @@ public:
     ~cubic_spline_approximator();
 
     data_vector_type approximate(const data_vector_type &x);
+
+    data_vector_type getPeaks();
 };
 
 #endif // APPROXIMATOR_FACTORY_H

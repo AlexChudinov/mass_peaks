@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     graphics/zoom_plot.cpp \
     app_data/data_export.cpp \
     app_data_handler/app_data_handler.cpp \
-    app_data_handler/approximator_factory.cpp
+    app_data_handler/approximator_factory.cpp \
+    xy_data_view.cpp
 
 HEADERS  += mainwindow.h \
     graphics/qcustomplot/qcustomplot.h \
@@ -30,7 +31,8 @@ HEADERS  += mainwindow.h \
     app_data/math/solvers.h \
     app_data/math/spline.h \
     app_data/math/array_operations.h \
-    app_data_handler/approximator_factory.h
+    app_data_handler/approximator_factory.h \
+    xy_data_view.h
 
 FORMS    += mainwindow.ui
 

@@ -82,10 +82,10 @@ public:
 
         for(const auto& coef : this->poly_coefs_)
         {
-            auto& diff_coefs = res[coef->first];
+            auto& diff_coefs = res[coef.first];
             math::For<0, n, true>::Do([&diff_coefs, coef](size_t j)
             {
-                diff_coefs[j] = (n - j) * coef->second[j];
+                diff_coefs[j] = (n - j) * coef.second[j];
             });
         }
 
@@ -108,13 +108,14 @@ public:
             if(++itxy == poly_coefs_.end()) return x0;
             y1 = itxy->second[n];
         }
-        Float x1 = itxy->first; x0 = (--itxy)->first;
+        Float x11 = itxy->first;
+        Float x00 = (--itxy)->first;
         auto fun = [this](Float x)->Float
         {
             return this->estimate_y_val(x);
         };
 
-        return math::fZero(fun, x0, x1, fabs(y1 - y0)*1e-10);
+        return math::fZero(fun, x00, x11, fabs(y1 - y0)*1e-10);
     }
 
     /**
@@ -128,10 +129,34 @@ public:
         while(x1 != x0)
         {
             zs.push_back(x1);
-            x0 = x1;
+            x0 = poly_coefs_.lower_bound(x1)->first;
             x1 = this->rhzero(x0);
         }
         return zs;
+    }
+
+    /**
+     * Get all maximums
+     */
+    std::vector<Float> get_maxs() const
+    {
+        if(order() < 2) return std::vector<Float>(); //No maximums for this order
+
+        peacewise_poly<n - 1, Float> diff = this->diff();
+        std::vector<Float> ps = diff.get_zeros();
+
+        auto pred = [this](Float xval)
+        {
+            auto it1 = this->poly_coefs_.lower_bound(xval), it2 = it1--;
+            return !(it1->second[n-1] > 0.0 && it2->second[n-1] < 0.0);
+        };
+
+        typename std::vector<Float>::iterator end =
+                std::remove_if(ps.begin(), ps.end(), pred);
+
+        ps.assign(ps.begin(), end);
+
+        return ps;
     }
 };
 

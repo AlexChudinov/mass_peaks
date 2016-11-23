@@ -30,3 +30,8 @@ data_vector_type cubic_spline_approximator::approximate(const data_vector_type& 
 {
     return spline_->poly().estimate_y_vals(x);
 }
+
+data_vector_type cubic_spline_approximator::getPeaks()
+{
+    return spline_->poly().get_maxs();
+}

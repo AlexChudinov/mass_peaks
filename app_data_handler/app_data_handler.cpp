@@ -42,6 +42,11 @@ QVector<double> app_data_handler::get_approximated_vals(const QVector<double> &x
     else return QVector<double>::fromStdVector(xy_data_approximator_->approximate(x.toStdVector()));
 }
 
+QVector<double> app_data_handler::getPeakPositions() const
+{
+    return QVector<double>::fromStdVector(xy_data_approximator_->getPeaks());
+}
+
 void app_data_handler::get_data()
 {
     if(this->data_exporter_->data_ptr())
