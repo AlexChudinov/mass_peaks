@@ -23,10 +23,24 @@ app_data_handler::~app_data_handler()
 
 void app_data_handler::load_data(QString file_name)
 {
-    this->data_exporter_.reset(data_export_factory::create_data_exporter(ASCII_FILE, QVariant(file_name)));
+    QStringList splitList = file_name.split(".");
+    QString ext = *std::prev(splitList.end());
+    if(ext == "txt" || ext == "dat")
+    {
+        this->data_exporter_.reset(
+                    data_export_factory::create_data_exporter(ASCII_FILE, QVariant(file_name)));
+    }
+    if(ext == "csv")
+    {
+        this->data_exporter_.reset(
+                    data_export_factory::create_data_exporter(CSV_FILE, QVariant(file_name)));
+
+    }
     this->start();
-    connect(this->data_exporter_.data(), SIGNAL(progress_val(int)), this, SIGNAL(progress_val(int)));
-    connect(this->data_exporter_.data(), SIGNAL(error(QString)), this, SIGNAL(warning(QString)));
+    connect(this->data_exporter_.data(), SIGNAL(progress_val(int)),
+        this, SIGNAL(progress_val(int)));
+    connect(this->data_exporter_.data(), SIGNAL(error(QString)),
+        this, SIGNAL(warning(QString)));
 }
 
 void app_data_handler::run()

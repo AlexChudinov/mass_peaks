@@ -50,7 +50,8 @@ void MainWindow::open_file_action()
                 this,
                 "Open file dialog",
                 QString(),
-                "ASCII data files (*.txt *.dat);;All files (*.*)");
+                "ASCII data files (*.txt *.dat);; "
+                "CSV data files (*.csv);;All files (*.*)");
 
     if(!file_name.isEmpty()) app_data_->load_data(file_name);
     connect(app_data_, SIGNAL(finished()), this, SLOT(init_approximator_handles_()));
@@ -159,7 +160,8 @@ void MainWindow::init_approximator_handles_()
 
         //Show spline parameters
         QDoubleSpinBox* set_smoothing_ = new QDoubleSpinBox(this);
-        set_smoothing_->setRange(0.0, 1.0E10);
+        set_smoothing_->setRange(1.0E-10, 1.0E10);
+        set_smoothing_->setDecimals(10);
         set_smoothing_->setLocale(QLocale::English);
         ui->mainToolBar->addWidget(set_smoothing_);
         connect(set_smoothing_, SIGNAL(valueChanged(double)),

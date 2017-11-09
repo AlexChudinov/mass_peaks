@@ -10,6 +10,7 @@
 enum DATA_EXPORT_TYPE
 {
     ASCII_FILE = 0x00,
+    CSV_FILE = 0x01,
     DATA_EXPORT_UNKNOWN = 0xFF
 };
 
@@ -39,6 +40,29 @@ public:
      * Get loaded data
      */
     QSharedPointer<xy_data> data_ptr() { return data_ptr_; }
+
+    /**
+     * Runs file loading process
+     */
+    void run();
+};
+
+/**
+ * Loads data from csv file
+ */
+class LoadCsv : public data_exporter
+{
+    QString m_strFileName;
+    QSharedPointer<xy_data> m_DataPtr;
+
+public:
+    LoadCsv(QVariant params);
+    ~LoadCsv(){}
+
+    /**
+     * Get loaded data
+     */
+    QSharedPointer<xy_data> data_ptr() { return m_DataPtr; }
 
     /**
      * Runs file loading process
