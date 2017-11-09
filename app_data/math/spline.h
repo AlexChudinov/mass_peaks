@@ -169,9 +169,9 @@ class cubic_spline
     using xy_values_type = std::map<Float, Float>;
     using data_vector_type = std::vector<Float>;
     using diff_poly = peacewise_poly<2, Float>;
-    using peacewise_poly = peacewise_poly<3, Float>;
+    using Poly = peacewise_poly<3, Float>;
 
-    std::unique_ptr<peacewise_poly> poly_;
+    std::unique_ptr<Poly> poly_;
 
     /**
      * Calculates spline coefs
@@ -201,7 +201,7 @@ class cubic_spline
                 c(new Float[N]),
                 d(new Float[N]);
         math::cubic_spline_coefficients(N,a.get(),b.get(),c.get(),d.get(),x.data(),y.data(),w.data());
-        poly_.reset(new peacewise_poly(N));
+        poly_.reset(new Poly(N));
         auto& refPoly = *poly_;
         for(size_t i = 0; i < N; ++i)
         {
@@ -242,7 +242,7 @@ public:
     /**
      * Returns ref to a peacewise polynomial
      */
-    const peacewise_poly& poly() const { return *poly_; }
+    const Poly& poly() const { return *poly_; }
 };
 
 #endif // SPLINE_H

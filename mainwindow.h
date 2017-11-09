@@ -49,7 +49,7 @@ private:
     Q_SLOT void init_approximator_handles_();
 
     void calculate_std_();
-    Q_SIGNAL stdChanged_(QString msg);
+    Q_SIGNAL void stdChanged_(QString msg);
     /**
      * Structs that holds all the approximator parameters
      */
