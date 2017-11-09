@@ -34,7 +34,7 @@
      <x>0</x>
      <y>0</y>
      <width>1260</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>
@@ -47,6 +47,7 @@
    </attribute>
    <addaction name="open_file_action"/>
    <addaction name="separator"/>
+   <addaction name="actionPeaks"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="xyTable">
@@ -93,8 +94,22 @@
     <string>Loads ascii delimited data from a file</string>
    </property>
   </action>
+  <action name="actionPeaks">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Icons/peak</normaloff>:/Icons/peak</iconset>
+   </property>
+   <property name="text">
+    <string>Peaks calc.</string>
+   </property>
+   <property name="toolTip">
+    <string>Calculates peak positions</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

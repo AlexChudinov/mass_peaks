@@ -2,5 +2,6 @@
     <qresource prefix="/Icons">
         <file alias="file_open_icon">main_window_icons/file_open_icon.png</file>
         <file alias="table_icon">main_window_icons/table_icon.png</file>
+        <file alias="peak">main_window_icons/peak.png</file>
     </qresource>
 </RCC>

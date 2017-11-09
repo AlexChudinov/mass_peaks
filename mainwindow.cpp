@@ -142,7 +142,7 @@ void MainWindow::create_data_view_()
     this->setCentralWidget(this->app_data_view_);
     connect(this->app_data_, SIGNAL(data_changed(vector_data_type,vector_data_type)),
             this, SLOT(plot_data(vector_data_type,vector_data_type)));
-    connect(this->app_data_, SIGNAL(approximatorChanged()), this, SLOT(calculatePeaks()));
+    connect(ui->actionPeaks, SIGNAL(triggered()), this, SLOT(calculatePeaks()));
 }
 
 void MainWindow::init_approximator_handles_()

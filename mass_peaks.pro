@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     app_data/data_export.cpp \
     app_data_handler/app_data_handler.cpp \
     app_data_handler/approximator_factory.cpp \
-    xy_data_view.cpp
+    xy_data_view.cpp \
+    new_math/peacewisepoly.cpp
 
 HEADERS  += mainwindow.h \
     graphics/qcustomplot/qcustomplot.h \
@@ -32,7 +33,8 @@ HEADERS  += mainwindow.h \
     app_data/math/spline.h \
     app_data/math/array_operations.h \
     app_data_handler/approximator_factory.h \
-    xy_data_view.h
+    xy_data_view.h \
+    new_math/peacewisepoly.h
 
 FORMS    += mainwindow.ui
 
