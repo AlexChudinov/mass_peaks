@@ -2,6 +2,7 @@
 #define APPROXIMATOR_FACTORY_H
 
 #include "../app_data/math/spline.h"
+#include "/new_math/peacewisepoly.h"
 
 using data_vector_type = std::vector<double>;
 
@@ -77,6 +78,11 @@ public:
     data_vector_type approximate(const data_vector_type &x);
 
     data_vector_type getPeaks();
+};
+
+class NewApproximator : public approximator
+{
+    std::un
 };
 
 #endif // APPROXIMATOR_FACTORY_H
