@@ -7,7 +7,7 @@
 PeacewisePoly::PeacewisePoly(uint8_t nDegree, size_t nCoefsSize)
     :
       m_nDegree(nDegree),
-      m_vCoefs(nCoefsSize)
+      m_vCoefs(nCoefsSize * (nDegree + 1))
 {
 
 }
@@ -30,13 +30,13 @@ void PeacewisePoly::diff()
 
 PeacewisePoly::PeaceCoefs PeacewisePoly::intervalCoefs(size_t idx) const
 {
-    return std::make_pair(m_vCoefs.cbegin() + idx * m_nDegree,
-                          m_vCoefs.cbegin() + (idx + 1) * m_nDegree);
+    return std::make_pair(m_vCoefs.cbegin() + idx * (m_nDegree + 1),
+                          m_vCoefs.cbegin() + (idx + 1) * (m_nDegree + 1));
 }
 
 StandartPeacewisePoly::StandartPeacewisePoly(const Vector &xVals, const Vector &yVals, double fSmoothParam)
     :
-      PeacewisePoly(3, 4*xVals.size()),
+      PeacewisePoly(3, xVals.size()),
       m_xVals(xVals.size())
 {
     assert(xVals.size() == yVals.size());
@@ -74,23 +74,53 @@ PeacewisePoly::PolyType StandartPeacewisePoly::type() const
     return PolyStandartType;
 }
 
-double StandartPeacewisePoly::operator ()(double x) const
-{
-    size_t idx = findInterval(x);
-    PeaceCoefs coefs = intervalCoefs(idx);
-    double t = x - m_xVals[idx];
-    double res = *coefs.first;
-    for(auto it = coefs.first + 1; it != coefs.second; ++it)
-    {
-        res *= t;
-        res += *it;
-    }
-    return res;
-}
-
 std::size_t StandartPeacewisePoly::findInterval(double x) const
 {
     auto it = std::lower_bound(m_xVals.begin(), m_xVals.end(), x);
     if(it == m_xVals.begin()) return 0;
     else return std::distance(m_xVals.begin(), std::prev(it));
+}
+
+double StandartPeacewisePoly::findDxValue(double x, size_t idx) const
+{
+    return x - m_xVals[idx];
+}
+
+EqualStepPeacewisePoly::EqualStepPeacewisePoly(const StandartPeacewisePoly &poly,
+                                               double h)
+    :
+    PeacewisePoly(3, estimateSplineSteps(poly.xMin(), poly.xMax(), h)),
+    m_fH(h),
+    m_fXMin(poly.xMin()),
+    m_fXMax(poly.xMin() + h*nSteps())
+{
+    Vector vXVals(nSteps()), vYVals(nSteps());
+    for(size_t i = 0; i < nSteps(); ++i){
+        vXVals[i] = poly.xMin() + i*h;
+        vYVals[i] = poly(vXVals[i]);
+    }
+    std::unique_ptr<PeacewisePoly> pPoly(new StandartPeacewisePoly(vXVals, vYVals));
+    for(size_t i = 0; i < nSteps(); ++i){
+        coefs()[i]  = pPoly->coefs()[i];
+        coefs()[i+1]= pPoly->coefs()[i+1];
+        coefs()[i+2]= pPoly->coefs()[i+2];
+        coefs()[i+3]= pPoly->coefs()[i+3];
+    }
+}
+
+PeacewisePoly::PolyType EqualStepPeacewisePoly::type() const
+{
+    return PeacewisePoly::PolyEqualType;
+}
+
+size_t EqualStepPeacewisePoly::findInterval(double x) const
+{
+    double dx = x - m_fXMin;
+    size_t n = size_t(dx / m_fH);
+    return dx < 0 ? 0 : (n >= nSteps() ? nSteps() - 1 : n);
+}
+
+double EqualStepPeacewisePoly::findDxValue(double x, size_t idx) const
+{
+    return x - m_fXMin - m_fH * idx;
 }

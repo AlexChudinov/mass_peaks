@@ -3,10 +3,14 @@
 
 #include <QMainWindow>
 
+class Approximator;
 class QCPRange;
 class app_data_handler;
 class zoom_plot_window;
 using vector_data_type = QVector<double>;
+class QComboBox;
+class QDoubleSpinBox;
+class QLabel;
 
 namespace Ui {
 class MainWindow;
@@ -43,22 +47,19 @@ private:
     Ui::MainWindow *ui;
     app_data_handler* app_data_;
     zoom_plot_window* app_data_view_;
+    QScopedPointer<Approximator> m_pDataApproximator;
+
+    QComboBox * m_comboChooseApproximator;
+    QDoubleSpinBox * m_spinBoxSmoothVal;
+    QLabel * m_labelShowStd;
 
     void connect_data_handler_();
     void create_data_view_();
-    Q_SLOT void init_approximator_handles_();
+    Q_SLOT void initApproximator();
 
-    void calculate_std_();
-    Q_SIGNAL void stdChanged_(QString msg);
-    /**
-     * Structs that holds all the approximator parameters
-     */
-    struct ApproximatorParams
-    {
-        double smoothing_;
-        QString name_;
-        int nsteps;
-    } approximatorParams_;
+    void calculateCurrentStd();
+    Q_SIGNAL void splineStdChanged(QString msg);
+    Q_SIGNAL void approximatorChanged();
 };
 
 #endif // MAINWINDOW_H

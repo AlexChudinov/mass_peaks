@@ -49,18 +49,6 @@ void app_data_handler::run()
         this->data_exporter_->run();
 }
 
-QVector<double> app_data_handler::get_approximated_vals(const QVector<double> &x)
-{
-    if(!xy_data_approximator_)
-        return QVector<double>();
-    else return QVector<double>::fromStdVector(xy_data_approximator_->approximate(x.toStdVector()));
-}
-
-QVector<double> app_data_handler::getPeakPositions() const
-{
-    return QVector<double>::fromStdVector(xy_data_approximator_->getPeaks());
-}
-
 void app_data_handler::get_data()
 {
     if(this->data_exporter_->data_ptr())
@@ -70,32 +58,5 @@ void app_data_handler::get_data()
                     vector_data_type::fromStdVector(xy_data_.data()->x()),
                     vector_data_type::fromStdVector(xy_data_.data()->y()));
         Q_EMIT this->dataChanged();
-    }
-}
-
-void app_data_handler::set_approximator(QString name, void *params)
-{
-    if(name == "Cubic spline" && xy_data_)
-    {
-        cubic_spline_params* app_pars = reinterpret_cast<cubic_spline_params*>(params);
-        if(!xy_data_->w().empty()) app_pars->weightings_ = xy_data_->w();
-        xy_data_approximator_.reset(approximator_factory::create_approximator
-                                    (CUBIC_SPLINE, app_pars,
-                                     xy_data_->x(), xy_data_->y()));
-        Q_EMIT this->approximatorChanged();
-    }
-}
-
-void app_data_handler::set_approximator(QString name, double smoothing)
-{
-    if(name == "Cubic spline" && xy_data_)
-    {
-        cubic_spline_params app_pars;
-        app_pars.smoothing_ = smoothing;
-        app_pars.weightings_.assign(xy_data_->w().begin(), xy_data_->w().end());
-        xy_data_approximator_.reset(approximator_factory::create_approximator
-                                    (CUBIC_SPLINE, &app_pars,
-                                     xy_data_->x(), xy_data_->y()));
-        Q_EMIT this->approximatorChanged();
     }
 }

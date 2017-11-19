@@ -1,88 +1,107 @@
 #ifndef APPROXIMATOR_FACTORY_H
 #define APPROXIMATOR_FACTORY_H
 
+#include <QScopedPointer>
+
 #include "../app_data/math/spline.h"
-#include "/new_math/peacewisepoly.h"
-
-using data_vector_type = std::vector<double>;
+#include "../new_math/peacewisepoly.h"
 
 /**
- * Creates sutable approximator for a given data
+ * @brief The Approximator class implements approximating engine
  */
-class approximator;
-struct approximator_params;
-class cubic_spline_approximator;
-
-/**
- * Approximator type to choose
- */
-enum APPROXIMATOR
-{
-    CUBIC_SPLINE = 0x00, ///cubic spline
-    APPROXIMATOR_UNKNOWN = 0xFF ///unknown type of an approximator
-};
-
-class approximator_factory
+class Approximator
 {
 public:
-    static approximator* create_approximator(APPROXIMATOR type,
-                                             const approximator_params* params,
-                                             const data_vector_type& x,
-                                             const data_vector_type& y);
-};
+    using Vector = std::vector<double>;
 
-/**
- * Parameters of an approximator
- */
-struct approximator_params{};
-struct cubic_spline_params : public approximator_params
-{
-    double smoothing_;
-    data_vector_type weightings_;
-};
-
-/**
- * Approximation of the xy data
- */
-class approximator
-{
-public:
+    virtual ~Approximator(){}
 
     /**
-     * Returns approximated values for data array for given x values
+     * @brief The Params class standart approximator parameters are x and y values
      */
-    virtual data_vector_type approximate(const data_vector_type& x) = 0;
+    class Params
+    {
+        const Vector& m_vXVals;
+        const Vector& m_vYVals;
+    public:
+
+        Params(const Vector& vXVals, const Vector& vYVals);
+        virtual ~Params(){}
+
+        const Vector& x() const;
+        const Vector& y() const;
+    };
 
     /**
-     * Calculates all peak positions in a spectrum
+     * Approximator type to choose
      */
-    virtual data_vector_type getPeaks() = 0;
+    enum ApproximatorType
+    {
+        CubicSplineType = 0x00, ///cubic spline
+        CubicSplineNewType = 0x01, ///cubic spline with new interface
+    };
 
-    virtual ~approximator(){}
+    static Approximator* create(ApproximatorType type, const Params& params);
+
+    virtual ApproximatorType type() const = 0;
+
+    /**
+     * @brief approximate
+     * @param vXVals x-values
+     * @return vector of corresponding y-values
+     */
+    virtual Vector approximate(const Vector& vXVals) const = 0;
+
+    /**
+     * @brief getPeaks
+     * @return maximums positions
+     */
+    virtual Vector getPeaks() const = 0;
 };
 
 /**
  * Regular cubic spline data approximation
  */
-class cubic_spline_approximator : public approximator
+class CubicSplineApproximator : public Approximator
 {
-    using spline = cubic_spline<double>;
-    std::unique_ptr<spline> spline_;
+    using Spline = cubic_spline<double>;
+    using PSpline = QScopedPointer<Spline>;
+
+    PSpline m_pSpline;
 public:
-    cubic_spline_approximator(const data_vector_type& x,
-                              const data_vector_type& y,
-                              double smooth_param,
-                              const data_vector_type& w);
-    ~cubic_spline_approximator();
 
-    data_vector_type approximate(const data_vector_type &x);
+    ApproximatorType type() const;
 
-    data_vector_type getPeaks();
+    class CubicSplineParams : public Approximator::Params
+    {
+        const double m_fSmooth;
+    public:
+
+        CubicSplineParams(const Vector &vXVals, const Vector &vYVals, double fSmooth);
+
+        double smooth() const;
+    };
+
+    CubicSplineApproximator(const CubicSplineParams& params);
+
+    Vector approximate(const Vector &x) const;
+
+    Vector getPeaks() const;
 };
 
-class NewApproximator : public approximator
+class CubicSplineApproximatorNew : public Approximator
 {
-    std::un
+    using Spline = StandartPeacewisePoly;
+    using PSpline = QScopedPointer<Spline>;
+    PSpline m_pSpline;
+public:
+
+    ApproximatorType type() const;
+
+    CubicSplineApproximatorNew(const CubicSplineApproximator::CubicSplineParams& params);
+
+    Vector approximate(const Vector& vXVals) const;
+    Vector getPeaks() const;
 };
 
 #endif // APPROXIMATOR_FACTORY_H

@@ -1,37 +1,89 @@
 #include "../app_data_handler/approximator_factory.h"
 
-approximator* approximator_factory::create_approximator(APPROXIMATOR type,
-                                                        const approximator_params *params,
-                                                        const data_vector_type &x,
-                                                        const data_vector_type &y)
+Approximator::Params::Params(const Vector &vXVals, const Vector &vYVals)
+    :
+      m_vXVals(vXVals),
+      m_vYVals(vYVals)
+{
+}
+
+
+const Approximator::Vector& Approximator::Params::x() const
+{
+    return m_vXVals;
+}
+
+const Approximator::Vector& Approximator::Params::y() const
+{
+    return m_vYVals;
+}
+
+Approximator* Approximator::create(ApproximatorType type, const Params& params)
 {
     switch(type)
     {
-    case CUBIC_SPLINE:
-        return new cubic_spline_approximator(x,y,
-                    static_cast<const cubic_spline_params*>(params)->smoothing_,
-                    static_cast<const cubic_spline_params*>(params)->weightings_);
+    case CubicSplineType:
+        return new CubicSplineApproximator
+                (static_cast<const CubicSplineApproximator::CubicSplineParams&>(params));
+    case CubicSplineNewType:
+        return new CubicSplineApproximatorNew
+                (static_cast<const CubicSplineApproximator::CubicSplineParams&>(params));
     default:
-        return nullptr;
+        return Q_NULLPTR;
     }
 }
 
-cubic_spline_approximator::cubic_spline_approximator(const data_vector_type &x,
-                                                     const data_vector_type &y,
-                                                     double smooth_param,
-                                                     const data_vector_type &w)
-    :
-      spline_(new spline(x,y,smooth_param,w))
-{}
-
-cubic_spline_approximator::~cubic_spline_approximator(){}
-
-data_vector_type cubic_spline_approximator::approximate(const data_vector_type& x)
+Approximator::ApproximatorType CubicSplineApproximator::type() const
 {
-    return spline_->poly().estimate_y_vals(x);
+    return CubicSplineType;
 }
 
-data_vector_type cubic_spline_approximator::getPeaks()
+CubicSplineApproximator::CubicSplineParams::CubicSplineParams(const Vector &vXVals, const Vector &vYVals, double fSmooth)
+    :
+      Approximator::Params(vXVals, vYVals),
+      m_fSmooth(fSmooth)
+{}
+
+double CubicSplineApproximator::CubicSplineParams::smooth() const
 {
-    return spline_->poly().get_maxs();
+    return m_fSmooth;
+}
+
+CubicSplineApproximator::CubicSplineApproximator(const CubicSplineParams& params)
+    :
+      m_pSpline(new Spline(params.x(), params.y(), params.smooth()))
+{}
+
+Approximator::Vector CubicSplineApproximator::approximate(const Vector& vXVals) const
+{
+    return m_pSpline->poly().estimate_y_vals(vXVals);
+}
+
+Approximator::Vector CubicSplineApproximator::getPeaks() const
+{
+    return m_pSpline->poly().get_maxs();
+}
+
+Approximator::ApproximatorType CubicSplineApproximatorNew::type() const
+{
+    return CubicSplineNewType;
+}
+
+CubicSplineApproximatorNew::CubicSplineApproximatorNew(const CubicSplineApproximator::CubicSplineParams &params)
+    :
+      m_pSpline(new StandartPeacewisePoly(params.x(), params.y(), params.smooth()))
+{}
+
+Approximator::Vector CubicSplineApproximatorNew::approximate(const Vector& vXVals) const
+{
+    Vector y(vXVals.size());
+    for(size_t i = 0; i < y.size(); ++i){
+        y[i] = (*m_pSpline)(vXVals[i]);
+    }
+    return y;
+}
+
+Approximator::Vector CubicSplineApproximatorNew::getPeaks() const
+{
+    return Vector();
 }

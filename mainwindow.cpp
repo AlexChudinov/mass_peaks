@@ -15,10 +15,6 @@ MainWindow::MainWindow(QWidget *parent) :
     app_data_(new app_data_handler(this)),
     app_data_view_(new zoom_plot_window(this))
 {
-    approximatorParams_.smoothing_ = 0.0;
-    approximatorParams_.name_ = "Cubic spline";
-    approximatorParams_.nsteps = 1000;
-
     //Set standard widgets
     ui->setupUi(this);
     ui->progressBar->hide();
@@ -54,7 +50,7 @@ void MainWindow::open_file_action()
                 "CSV data files (*.csv);;All files (*.*)");
 
     if(!file_name.isEmpty()) app_data_->load_data(file_name);
-    connect(app_data_, SIGNAL(finished()), this, SLOT(init_approximator_handles_()));
+    connect(app_data_, SIGNAL(finished()), this, SLOT(initApproximator()));
 }
 
 void MainWindow::show_message(QString msg)
@@ -80,29 +76,35 @@ void MainWindow::plot_data(bool keep_data_flag)
 
 void MainWindow::changeSmoothing(double smoothing)
 {
-    approximatorParams_.smoothing_ = smoothing;
-    cubic_spline_params params;
-    params.smoothing_ = smoothing;
-    app_data_->set_approximator(approximatorParams_.name_, reinterpret_cast<void*>(&params));
-    this->calculate_std_();
+    changeApproximator(m_comboChooseApproximator->currentText());
 }
 
 void MainWindow::changeApproximator(QString name)
 {
-    approximatorParams_.name_ = name;
-    cubic_spline_params params;
-    params.smoothing_ = approximatorParams_.smoothing_;
-    app_data_->set_approximator(name, reinterpret_cast<void*>(&params));
-    this->calculate_std_();
+    double fSmooth = m_spinBoxSmoothVal->text().toDouble();
+    if (name == "Cubic spline")
+    {
+        CubicSplineApproximator::CubicSplineParams
+                params(app_data_->data().x(), app_data_->data().y(), fSmooth);
+        m_pDataApproximator.reset(Approximator::create(Approximator::CubicSplineType, params));
+    }
+    else if (name == "Cubic spline (new)")
+    {
+        CubicSplineApproximator::CubicSplineParams
+                params(app_data_->data().x(), app_data_->data().y(), fSmooth);
+        m_pDataApproximator.reset(Approximator::create(Approximator::CubicSplineNewType, params));
+    }
+    calculateCurrentStd();
+    Q_EMIT approximatorChanged();
 }
 
 void MainWindow::showApproxLine()
 {
     QCPRange range = app_data_view_->plot_area()->xAxis->range();
-    double xmin = range.lower, xmax = range.upper, dx = (xmax-xmin) / approximatorParams_.nsteps;
-    QVector<double> x(approximatorParams_.nsteps), y;
+    double xmin = range.lower, xmax = range.upper, dx = (xmax-xmin) / 100;
+    QVector<double> x(100), y;
     std::for_each(x.begin(), x.end(), [&xmin, dx](double& xval){ xval = (xmin+=dx);});
-    y = app_data_->get_approximated_vals(x);
+    y = QVector<double>::fromStdVector(m_pDataApproximator->approximate(x.toStdVector()));
     QCPGraph* g;
     if(app_data_view_->plot_area()->graphCount() == 2)
         g = app_data_view_->plot_area()->graph();
@@ -115,15 +117,20 @@ void MainWindow::showApproxLine()
 
 void MainWindow::calculatePeaks()
 {
-    QVector<double> peak_positions   = this->app_data_->getPeakPositions();
-    QVector<double> peak_intensities = this->app_data_->get_approximated_vals(peak_positions);
+    if(!this->app_data_->data().x().empty())
+    {
+        QVector<double> peak_positions   =
+                QVector<double>::fromStdVector(m_pDataApproximator->getPeaks());
+        QVector<double> peak_intensities =
+                QVector<double>::fromStdVector(m_pDataApproximator->approximate(peak_positions.toStdVector()));
 
-    XyDataTableView* peaksTable = new MassPeaksTable(this);
+        XyDataTableView* peaksTable = new MassPeaksTable(this);
 
-    peaksTable->setXyData(peak_positions, peak_intensities);
+        peaksTable->setXyData(peak_positions, peak_intensities);
 
-    this->ui->tableView->setModel(peaksTable);
-    this->ui->tableView->update();
+        this->ui->tableView->setModel(peaksTable);
+        this->ui->tableView->update();
+    }
 }
 
 void MainWindow::connect_data_handler_()
@@ -145,48 +152,53 @@ void MainWindow::create_data_view_()
     connect(ui->actionPeaks, SIGNAL(triggered()), this, SLOT(calculatePeaks()));
 }
 
-void MainWindow::init_approximator_handles_()
+void MainWindow::initApproximator()
 {
-    disconnect(app_data_, SIGNAL(finished()), this, SLOT(init_approximator_handles_()));
+    disconnect(app_data_, SIGNAL(finished()), this, SLOT(initApproximator()));
 
-    if(!app_data_->hasApproximator())
+    if(!m_pDataApproximator)
     {
         //Create approximator chooser
-        QComboBox* set_approxmtr_ = new QComboBox(this);
-        set_approxmtr_->addItem({"Cubic spline"});
-        ui->mainToolBar->addWidget(set_approxmtr_);
-        connect(set_approxmtr_, SIGNAL(activated(QString)),
+        m_comboChooseApproximator = new QComboBox(this);
+        m_comboChooseApproximator->addItem({"Cubic spline"});
+        m_comboChooseApproximator->addItem({"Cubic spline (new)"});
+        ui->mainToolBar->addWidget(m_comboChooseApproximator);
+        connect(m_comboChooseApproximator, SIGNAL(activated(QString)),
                 this, SLOT(changeApproximator(QString)));
 
         //Show spline parameters
-        QDoubleSpinBox* set_smoothing_ = new QDoubleSpinBox(this);
-        set_smoothing_->setRange(1.0E-10, 1.0E10);
-        set_smoothing_->setDecimals(10);
-        set_smoothing_->setLocale(QLocale::English);
-        ui->mainToolBar->addWidget(set_smoothing_);
-        connect(set_smoothing_, SIGNAL(valueChanged(double)),
+        m_spinBoxSmoothVal = new QDoubleSpinBox(this);
+        m_spinBoxSmoothVal->setRange(1.0E-10, 1.0E10);
+        m_spinBoxSmoothVal->setDecimals(10);
+        m_spinBoxSmoothVal->setLocale(QLocale::English);
+        ui->mainToolBar->addWidget(m_spinBoxSmoothVal);
+        connect(m_spinBoxSmoothVal, SIGNAL(valueChanged(double)),
                 this, SLOT(changeSmoothing(double)));
 
         //Spline standars deviation from an experimental data
-        QLabel* show_std_ = new QLabel(" std = 0.0", this);
-        ui->mainToolBar->addWidget(show_std_);
-        connect(this, SIGNAL(stdChanged_(QString)), show_std_, SLOT(setText(QString)));
+        m_labelShowStd = new QLabel(" std = 0.0", this);
+        ui->mainToolBar->addWidget(m_labelShowStd);
+        connect(this, SIGNAL(splineStdChanged(QString)),
+                m_labelShowStd, SLOT(setText(QString)));
 
-        connect(app_data_, SIGNAL(approximatorChanged()), this, SLOT(showApproxLine()));
+        connect(this, SIGNAL(approximatorChanged()),
+                this, SLOT(showApproxLine()));
         connect(app_data_view_->plot_area(), SIGNAL(xrangeNotify()),
                 this, SLOT(showApproxLine()));
-    }
 
-    app_data_->set_approximator(approximatorParams_.name_,approximatorParams_.smoothing_);
+        changeApproximator("Cubic spline");
+        showApproxLine();
+    }
 }
 
-void MainWindow::calculate_std_()
+void MainWindow::calculateCurrentStd()
 {
     double yy = 0.0, yy2 = 0.0, norm = 0.0;
     QVector<double> y = QVector<double>::fromStdVector(app_data_->data().y());
     QVector<double> x = QVector<double>::fromStdVector(app_data_->data().x());
     QVector<double> w = QVector<double>::fromStdVector(app_data_->data().w());
-    QVector<double> yt = app_data_->get_approximated_vals(x);
+    QVector<double> yt =
+            QVector<double>::fromStdVector(m_pDataApproximator->approximate(x.toStdVector()));
     if(w.empty())
     {
         QVector<double>::const_iterator it1 = y.constBegin(), it2 = yt.constBegin();
@@ -205,5 +217,5 @@ void MainWindow::calculate_std_()
             norm += *it3;
         }
     }
-    Q_EMIT stdChanged_(QString(" std = %1").arg((yy2 - yy*yy)/norm));
+    Q_EMIT splineStdChanged(QString(" std = %1").arg((yy2 - yy*yy)/norm));
 }
