@@ -101,10 +101,10 @@ EqualStepPeacewisePoly::EqualStepPeacewisePoly(const StandartPeacewisePoly &poly
     }
     std::unique_ptr<PeacewisePoly> pPoly(new StandartPeacewisePoly(vXVals, vYVals));
     for(size_t i = 0; i < nSteps(); ++i){
-        coefs()[i]  = pPoly->coefs()[i];
-        coefs()[i+1]= pPoly->coefs()[i+1];
-        coefs()[i+2]= pPoly->coefs()[i+2];
-        coefs()[i+3]= pPoly->coefs()[i+3];
+        coefs()[4*i]  = pPoly->coefs()[4*i];
+        coefs()[4*i+1]= pPoly->coefs()[4*i+1];
+        coefs()[4*i+2]= pPoly->coefs()[4*i+2];
+        coefs()[4*i+3]= pPoly->coefs()[4*i+3];
     }
 }
 
