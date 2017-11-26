@@ -94,6 +94,15 @@ void MainWindow::changeApproximator(QString name)
                 params(app_data_->data().x(), app_data_->data().y(), fSmooth);
         m_pDataApproximator.reset(Approximator::create(Approximator::CubicSplineNewType, params));
     }
+    else if (name == "Cubic spline with equal steps")
+    {
+        CubicSplineApproximator::CubicSplineParams
+                params(app_data_->data().x(), app_data_->data().y(), fSmooth);
+        m_pDataApproximator.reset
+        (
+            Approximator::create(Approximator::CubicSplineEqualStepSizeType, params)
+        );
+    }
     calculateCurrentStd();
     Q_EMIT approximatorChanged();
 }
@@ -162,6 +171,7 @@ void MainWindow::initApproximator()
         m_comboChooseApproximator = new QComboBox(this);
         m_comboChooseApproximator->addItem({"Cubic spline"});
         m_comboChooseApproximator->addItem({"Cubic spline (new)"});
+        m_comboChooseApproximator->addItem({"Cubic spline with equal steps"});
         ui->mainToolBar->addWidget(m_comboChooseApproximator);
         connect(m_comboChooseApproximator, SIGNAL(activated(QString)),
                 this, SLOT(changeApproximator(QString)));

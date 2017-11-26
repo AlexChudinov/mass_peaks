@@ -24,10 +24,19 @@ Approximator* Approximator::create(ApproximatorType type, const Params& params)
     {
     case CubicSplineType:
         return new CubicSplineApproximator
-                (static_cast<const CubicSplineApproximator::CubicSplineParams&>(params));
+        (
+            static_cast<const CubicSplineApproximator::CubicSplineParams&>(params)
+        );
     case CubicSplineNewType:
         return new CubicSplineApproximatorNew
-                (static_cast<const CubicSplineApproximator::CubicSplineParams&>(params));
+        (
+            static_cast<const CubicSplineApproximator::CubicSplineParams&>(params)
+        );
+    case CubicSplineEqualStepSizeType:
+        return new CubicSplineEqualStepSizeApproximator
+        (
+            static_cast<const CubicSplineApproximator::CubicSplineParams&>(params)
+        );
     default:
         return Q_NULLPTR;
     }
@@ -69,7 +78,10 @@ Approximator::ApproximatorType CubicSplineApproximatorNew::type() const
     return CubicSplineNewType;
 }
 
-CubicSplineApproximatorNew::CubicSplineApproximatorNew(const CubicSplineApproximator::CubicSplineParams &params)
+CubicSplineApproximatorNew::CubicSplineApproximatorNew
+(
+    const CubicSplineApproximator::CubicSplineParams &params
+)
     :
       m_pSpline(new StandartPeacewisePoly(params.x(), params.y(), params.smooth()))
 {}
@@ -84,6 +96,40 @@ Approximator::Vector CubicSplineApproximatorNew::approximate(const Vector& vXVal
 }
 
 Approximator::Vector CubicSplineApproximatorNew::getPeaks() const
+{
+    return Vector();
+}
+
+Approximator::ApproximatorType CubicSplineEqualStepSizeApproximator::type() const
+{
+    return CubicSplineEqualStepSizeType;
+}
+
+CubicSplineEqualStepSizeApproximator::CubicSplineEqualStepSizeApproximator
+(
+    const CubicSplineApproximator::CubicSplineParams &params
+)
+{
+    double h = params.x()[1] - params.x()[0];
+    for(size_t i = 1; i < params.x().size() - 1; ++i)
+    {
+        h = qMin(h, qAbs(params.x()[i+1] - params.x()[i]));
+    }
+    StandartPeacewisePoly tSpline(params.x(), params.y(), params.smooth());
+    m_pSpline.reset(new EqualStepPeacewisePoly(tSpline, h));
+}
+
+Approximator::Vector CubicSplineEqualStepSizeApproximator::approximate(const Vector &vXVals) const
+{
+    Vector vYVals(vXVals.size());
+    for(size_t i = 0; i < vXVals.size(); ++i)
+    {
+        vYVals[i] = (*m_pSpline)(vXVals[i]);
+    }
+    return vYVals;
+}
+
+Approximator::Vector CubicSplineEqualStepSizeApproximator::getPeaks() const
 {
     return Vector();
 }

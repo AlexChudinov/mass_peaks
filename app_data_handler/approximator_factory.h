@@ -39,6 +39,7 @@ public:
     {
         CubicSplineType = 0x00, ///cubic spline
         CubicSplineNewType = 0x01, ///cubic spline with new interface
+        CubicSplineEqualStepSizeType = 0x02 ///interface for cubic spline with equal x-steps
     };
 
     static Approximator* create(ApproximatorType type, const Params& params);
@@ -101,6 +102,23 @@ public:
     CubicSplineApproximatorNew(const CubicSplineApproximator::CubicSplineParams& params);
 
     Vector approximate(const Vector& vXVals) const;
+
+    Vector getPeaks() const;
+};
+
+class CubicSplineEqualStepSizeApproximator : public Approximator
+{
+    using Spline = EqualStepPeacewisePoly;
+    using PSpline= QScopedPointer<Spline>;
+    PSpline m_pSpline;
+public:
+
+    ApproximatorType type() const;
+
+    CubicSplineEqualStepSizeApproximator(const CubicSplineApproximator::CubicSplineParams& params);
+
+    Vector approximate(const Vector &vXVals) const;
+
     Vector getPeaks() const;
 };
 
